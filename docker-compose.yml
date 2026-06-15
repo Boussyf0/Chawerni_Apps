@@ -1,0 +1,47 @@
+# Déploiement V1 Chawerni : API (FastAPI + BGE-M3) derrière Caddy (TLS auto).
+# L'index vit sur Qdrant Cloud (free tier) — voir DEPLOY.md.
+#
+#   cp .env.example .env   # renseigner GROQ_API_KEY, QDRANT_URL, QDRANT_API_KEY, DOMAIN
+#   docker compose up -d --build
+
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Index externe : on ne tombe PAS en mode local disque dans le conteneur.
+      QDRANT_URL: ${QDRANT_URL}
+      QDRANT_API_KEY: ${QDRANT_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
+    volumes:
+      - models:/models           # cache du modèle BGE-M3 (persiste entre redémarrages)
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s        # 1er démarrage : téléchargement du modèle
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  models:
+  caddy_data:
+  caddy_config:

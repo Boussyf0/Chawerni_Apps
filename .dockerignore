@@ -1,0 +1,11 @@
+chawerni_app/
+corpus/raw/
+corpus/chunks/
+Prototype_chawarni/
+docs/
+rag/.venv/
+rag/.qdrant/
+rag/.env
+**/__pycache__/
+*.pyc
+.git/

@@ -1,0 +1,6 @@
+# TLS automatique (Let's Encrypt) + reverse proxy vers l'API.
+# {$DOMAIN} est injecté depuis .env (ex. chawerni.me).
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy api:8000
+}

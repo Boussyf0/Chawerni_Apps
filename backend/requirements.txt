@@ -1,0 +1,6 @@
+# API Chawerni (Phase 3). S'ajoute aux dépendances du cœur RAG (rag/requirements.txt).
+-r ../rag/requirements.txt
+
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7

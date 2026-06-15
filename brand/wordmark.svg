@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="140" viewBox="0 0 460 140" fill="none">
+  <!-- Lockup bilingue : marque + شاورني (dominant) / CHAWERNI (latin).
+       Police IBM Plex Sans Arabic / IBM Plex Sans — À VECTORISER (convertir le
+       texte en tracés) avant diffusion pour ne pas dépendre de la police. -->
+  <g transform="translate(8 22)">
+    <rect x="14" y="12" width="62" height="46" rx="15" fill="#2D3A8C"/>
+    <rect x="20.5" y="50.5" width="17" height="17" rx="3" transform="rotate(45 29 59)" fill="#2D3A8C"/>
+    <rect x="36" y="64" width="12" height="12" rx="2.5" transform="rotate(45 42 70)" fill="#2D3A8C"/>
+    <rect x="51" y="76.5" width="9" height="9" rx="2" transform="rotate(45 55.5 81)" fill="#E8A13D"/>
+  </g>
+  <text x="148" y="70" text-anchor="start"
+        font-family="'IBM Plex Sans Arabic','Geeza Pro',sans-serif"
+        font-size="56" font-weight="600" fill="#2D3A8C">شاورني</text>
+  <text x="150" y="104" text-anchor="start"
+        font-family="'IBM Plex Sans','Helvetica Neue',sans-serif"
+        font-size="22" font-weight="500" letter-spacing="6" fill="#5C564F">CHAWERNI</text>
+</svg>

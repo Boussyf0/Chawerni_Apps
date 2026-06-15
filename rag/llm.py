@@ -1,0 +1,198 @@
+"""Abstraction LLM — génération de la réponse à partir du contexte sourcé.
+
+Une interface unique `LLMProvider.generate(messages)` ; l'implémentation par défaut
+parle à l'API Groq (SDK OpenAI-compatible). Changer de fournisseur = ajouter une
+classe, sans toucher au retriever ni au backend.
+
+Garde-fous (intégrés au prompt système) :
+  - Information juridique, jamais conseil personnalisé (loi 28-08).
+  - Citation OBLIGATOIRE au format [Code, Article N°, version JJ/MM/AAAA], et
+    uniquement à partir du contexte fourni — interdiction d'inventer.
+  - Si le contexte est vide → refus honnête (mais ce cas est court-circuité en
+    amont par le pipeline, qui n'appelle pas le LLM sans contexte).
+  - Réponse dans la langue de la question ; en darija, la reformulation est orale
+    (graphie arabe) mais les citations restent textuelles (arabe classique / FR).
+
+Usage : importé par rag.pipeline. Nécessite GROQ_API_KEY (env ou rag/.env).
+"""
+
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
+
+from . import config
+
+SYSTEM_PROMPT = """\
+Tu es Chawerni (شاورني), un assistant d'information juridique sur le droit marocain.
+
+RÈGLES ABSOLUES :
+1. Tu donnes de l'INFORMATION juridique, jamais un conseil ou un avis personnalisé \
+(loi 28-08 sur la profession d'avocat). Tu n'es pas avocat et tu ne remplaces pas un \
+professionnel.
+2. Tu réponds UNIQUEMENT à partir des articles fournis dans le CONTEXTE ci-dessous. \
+Tu n'inventes JAMAIS d'article, de numéro, de date ou de contenu. Si le contexte ne \
+permet pas de répondre, dis-le honnêtement.
+3. Chaque affirmation juridique DOIT être suivie de sa source. Reprends EXACTEMENT \
+l'en-tête entre crochets fourni au-dessus de chaque article du contexte (forme : \
+[Nom du code, Article N°, JJ/MM/AAAA]) — copie-le tel quel, n'écris jamais le mot \
+« Code » seul ni un numéro qui n'apparaît pas dans le contexte.
+4. Le texte arabe fait foi juridiquement. Les citations d'articles restent textuelles \
+(arabe classique ou français officiel) ; tu ne les paraphrases pas.
+5. Tu réponds dans la LANGUE DE LA QUESTION :
+   - français → français ;
+   - arabe classique → arabe classique ;
+   - darija (arabe dialectal marocain) → darija en graphie arabe, ton oral et \
+chaleureux, MAIS les citations d'articles restent dans leur langue d'origine.
+6. Pour un sujet personnel grave (pénal, garde d'enfants, violence), tu informes \
+puis tu rappelles qu'un avocat est indispensable.
+7. Si les articles fournis dans le CONTEXTE ne permettent PAS de répondre à la \
+question (sujet hors de ces textes), tu réponds EXACTEMENT et UNIQUEMENT par le \
+mot-clé : INSUFFISANT — rien d'autre. Ne force jamais une réponse à partir \
+d'articles hors-sujet.
+
+Style : clair, direct, tutoiement. Pas de jargon inutile. Va à l'essentiel puis cite."""
+
+# Sentinel renvoyé par le LLM quand le contexte ne répond pas → refus honnête.
+INSUFFICIENT = "INSUFFISANT"
+
+REFORMULATE_PROMPT = """\
+Tu reçois une question en darija (arabe dialectal marocain). Reformule-la en arabe \
+standard moderne (fusha) juridique, concise, adaptée à la recherche dans des textes de \
+loi. Garde EXACTEMENT le sens. Réponds UNIQUEMENT par la question reformulée (une seule \
+ligne), sans guillemets, sans explication, sans préfixe.
+
+Exemples :
+darija: شنو حقوقي إلا تفصلت من الخدمة؟
+fusha: ما هي حقوقي عند الفصل من العمل؟
+darija: أشنو هو عقد الكراء بالضبط؟
+fusha: ما هو عقد الكراء؟
+darija: منشكون كتمشي ليه الحضانة ديال الدراري؟
+fusha: لمن تُسند حضانة الأطفال؟"""
+
+
+class LLMProvider(ABC):
+    """Interface minimale d'un fournisseur de génération."""
+
+    @abstractmethod
+    def generate(self, messages: list[dict], temperature: float = 0.2,
+                 max_tokens: int = 1024) -> str:
+        ...
+
+
+class GroqProvider(LLMProvider):
+    """API Groq via le SDK OpenAI-compatible (clé GROQ_API_KEY)."""
+
+    def __init__(self, model: str | None = None, api_key: str | None = None):
+        from openai import OpenAI
+
+        key = api_key or config.GROQ_API_KEY
+        if not key:
+            raise RuntimeError(
+                "GROQ_API_KEY absente : exporte-la ou place-la dans rag/.env."
+            )
+        self.model = model or config.GROQ_MODEL
+        self._client = OpenAI(base_url=config.GROQ_BASE_URL, api_key=key)
+
+    def generate(self, messages: list[dict], temperature: float = 0.2,
+                 max_tokens: int = 1024) -> str:
+        import time
+
+        from openai import APIError, RateLimitError
+
+        # Backoff sur les limites de débit Groq (l'éval enchaîne ~40 appels).
+        delay = 2.0
+        for attempt in range(5):
+            try:
+                resp = self._client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+                return resp.choices[0].message.content or ""
+            except RateLimitError:
+                if attempt == 4:
+                    raise
+                time.sleep(delay)
+                delay *= 2
+            except APIError:
+                if attempt >= 2:
+                    raise
+                time.sleep(delay)
+        return ""
+
+
+def _fmt_date(version: str) -> str:
+    """ISO (2025-07-24) → JJ/MM/AAAA, le format de citation attendu."""
+    parts = (version or "").split("-")
+    if len(parts) == 3:
+        return f"{parts[2]}/{parts[1]}/{parts[0]}"
+    return version
+
+
+def build_context(chunks) -> str:
+    """Met en forme les articles retrouvés pour le prompt (citation + hiérarchie).
+
+    L'en-tête EST le gabarit de citation exact à reprendre : vrai nom de code +
+    numéro d'article + date JJ/MM/AAAA. Le modèle n'a qu'à le recopier.
+    """
+    blocs = []
+    for c in chunks:
+        p = c.payload
+        code_name = config.CODE_NAMES.get(p.get("code"), p.get("code"))
+        hier = " › ".join(str(v) for v in (p.get("hierarchie") or {}).values())
+        entete = f"[{code_name}, {p.get('marqueur')} {p.get('article_num')}, {_fmt_date(p.get('version', ''))}]"
+        ligne_hier = f"\nHiérarchie : {hier}" if hier else ""
+        blocs.append(f"{entete}{ligne_hier}\n{p.get('texte', '').strip()}")
+    return "\n\n---\n\n".join(blocs)
+
+
+def build_messages(question: str, chunks) -> list[dict]:
+    """Construit la liste de messages (système + contexte + question)."""
+    context = build_context(chunks)
+    user = (
+        f"CONTEXTE (articles de loi disponibles) :\n\n{context}\n\n"
+        f"---\n\nQUESTION : {question}\n\n"
+        "Réponds en t'appuyant uniquement sur le contexte ci-dessus, en citant "
+        "chaque source au format [Code, Article N°, version]."
+    )
+    return [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user},
+    ]
+
+
+_provider: LLMProvider | None = None
+_fast_provider: LLMProvider | None = None
+
+
+def get_provider() -> LLMProvider:
+    """Fournisseur LLM de génération (modèle qualité, ex. 70B)."""
+    global _provider
+    if _provider is None:
+        _provider = GroqProvider()
+    return _provider
+
+
+def get_fast_provider() -> LLMProvider:
+    """Fournisseur LLM rapide/économique (ex. 8B) pour les tâches courtes."""
+    global _fast_provider
+    if _fast_provider is None:
+        _fast_provider = GroqProvider(model=config.GROQ_MODEL_FAST)
+    return _fast_provider
+
+
+def reformulate_darija(question: str) -> str:
+    """Darija → arabe standard pour la recherche (couche de reformulation LLM).
+
+    La darija est trop éloignée de l'arabe classique des textes de loi dans
+    l'espace d'embedding (cosinus médian 0,53 vs 0,61) ; on la reformule en fusha
+    AVANT le retrieval. La réponse, elle, restera en darija (langue de la question).
+    """
+    messages = [
+        {"role": "system", "content": REFORMULATE_PROMPT},
+        {"role": "user", "content": question},
+    ]
+    # Tâche courte → modèle rapide (et empiriquement meilleur ici pour le retrieval).
+    out = get_fast_provider().generate(messages, temperature=0.0, max_tokens=128)
+    return out.strip() or question

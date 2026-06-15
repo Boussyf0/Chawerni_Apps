@@ -1,0 +1,215 @@
+{
+  "_meta": {
+    "projet": "Chawerni — corpus juridique marocain (Tier 1)",
+    "genere_le": "2026-06-11",
+    "source_primaire": "https://adala.justice.gov.ma (inventaires: adala_inventory_fr.json / adala_inventory_ar.json, regénérables via scripts/crawl_adala.py)",
+    "note": "Le texte arabe fait foi juridiquement. Les URLs Adala contiennent des timestamps qui changent à chaque réupload : relancer le crawler si 404."
+  },
+  "textes": {
+    "constitution_2011": {
+      "titre": "Constitution du Royaume du Maroc (2011)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/01/30/%D8%A7%D9%84%D8%AF%D8%B3%D8%AA%D9%88%D8%B1-1706626006826.pdf",
+        "source": "adala",
+        "nom_adala": "دستور المملكة المغربية لسنة 2011",
+        "maj_adala": "2025-12-25"
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/02/28/costitution-1709118294788.pdf",
+        "source": "adala",
+        "nom_adala": "Constitution 2011",
+        "maj_adala": "2024-10-09"
+      }
+    },
+    "code_penal": {
+      "titre": "Code pénal (dahir 1-59-413)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2025/03/14/%D8%B8%D9%80%D9%87%D9%8A%D8%B1%20%D8%B4%D9%80%D8%B1%D9%8A%D9%81%20%D8%B1%D9%82%D9%85%201.59.413%20%D8%A8%D8%A7%D9%84%D9%85%D8%B5%D8%A7%D8%AF%D9%82%D8%A9%20%D8%B9%D9%84%D9%89%20%D9%85%D8%AC%D9%85%D9%88%D8%B9%D8%A9%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D9%84%D8%AC%D9%86%D8%A7%D8%A6%D9%8A-1741952873602.pdf",
+        "source": "adala",
+        "nom_adala": "ظهير شريف بالمصادقة على مجموعة القانون الجنائي",
+        "maj_adala": "2026-04-28"
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2025/04/03/Dahir%20n%C2%B0%201-59-413%20portant%20approbation%20du%20texte%20du%20code%20penal-1743685280109.pdf",
+        "source": "adala",
+        "nom_adala": "Code pénal",
+        "maj_adala": "2025-11-05"
+      }
+    },
+    "procedure_penale": {
+      "titre": "Code de procédure pénale (loi 22-01)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2025/12/03/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%D8%B1%D9%82%D9%85%201.02.255%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2022.01%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%20%D8%A8%D8%A7%D9%84%D9%85%D8%B3%D8%B7%D8%B1%D8%A9%20%D8%A7%D9%84%D8%AC%D9%86%D8%A7%D8%A6%D9%8A%D8%A9-1764773243438.pdf",
+        "source": "adala",
+        "nom_adala": "القانون المتعلق بالمسطرة الجنائية",
+        "maj_adala": "2026-04-28"
+      },
+      "fr": {
+        "url": "https://www.vertic.org/media/National%20Legislation/Morocco/MA_Criminal_Procedure_Code.pdf",
+        "source": "miroir_non_officiel (vertic.org)",
+        "note": "Pas de version FR sur Adala. Traduction officielle non consolidée — la version AR Adala fait référence. Attention : réforme loi 03-23 en cours."
+      }
+    },
+    "doc": {
+      "titre": "Code des obligations et des contrats (DOC)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/10/24/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%A8%D9%85%D8%AB%D8%A7%D8%A8%D8%A9%20%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D9%84%D8%A7%D9%84%D8%AA%D8%B2%D8%A7%D9%85%D8%A7%D8%AA%20%D9%88%D8%A7%D9%84%D8%B9%D9%82%D9%88%D8%AF-1729777400387.pdf",
+        "source": "adala",
+        "nom_adala": "ظهير بمثابة قانون الالتزامات والعقود",
+        "maj_adala": "2025-12-15"
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/02/28/Code%20des%20Obligations%20et%20des%20Contrats_compressed-1709126934943.pdf",
+        "source": "adala",
+        "nom_adala": "Code des Obligations et des Contrats",
+        "maj_adala": "2025-07-24"
+      }
+    },
+    "moudawana": {
+      "titre": "Code de la famille — Moudawana (loi 70-03)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/07/22/%D9%85%D8%AF%D9%88%D9%86%D8%A9%20%D8%A7%D9%84%D8%A3%D8%B3%D8%B1%D8%A9-1721646687560.pdf",
+        "source": "adala",
+        "nom_adala": "قانون بمثابة مدونة الأسرة",
+        "maj_adala": "2026-05-25"
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/12/12/DAHIR%20N%C2%B0%201-04-22%20PORTANT%20PROMULGATION%20DE%20LA%20LOI.PDF-1734012188728.pdf",
+        "source": "adala",
+        "nom_adala": "Code de la famille",
+        "maj_adala": "2024-12-12"
+      }
+    },
+    "code_travail": {
+      "titre": "Code du travail (loi 65-99)",
+      "tier": 1,
+      "ar": {
+        "url": "https://miepeec.gov.ma/wp-content/uploads/2019/08/code_travail.pdf",
+        "source": "miepeec.gov.ma (ministère de l'Inclusion économique et de l'Emploi)",
+        "maj_adala": "2019-08",
+        "note": "Le PDF Adala (صيغة 2021, plus récent) a une couche texte brouillée inexploitable (ordre visuel mixte) — remplacé par le PDF du ministère du travail, propre. Base loi 65-99 de 2004 ; amendements postérieurs (19-12, 18-12) couverts par des textes séparés du corpus. Re-tester le PDF Adala à sa prochaine mise à jour (registry hash)."
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/04/30/code%20du%20travail-1714463246806.pdf",
+        "source": "adala",
+        "nom_adala": "Code du travail",
+        "maj_adala": "2025-11-10"
+      }
+    },
+    "code_commerce": {
+      "titre": "Code de commerce (loi 15-95)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2026/05/25/%D8%B8%D9%80%D9%80%D9%87%D9%80%D9%80%D9%8A%D9%80%D9%80%D8%B1%20%D8%B4%D9%80%D9%80%D8%B1%D9%8A%D9%80%D9%80%D9%81%20%D8%B1%D9%82%D9%80%D9%80%D9%85%201.96.83%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2015.95-1779718527894.pdf",
+        "source": "adala",
+        "nom_adala": "قانون يتعلق بمدونة التجارة",
+        "maj_adala": "2026-05-25"
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/03/01/Code%20de%20commerce_compressed-1709282723074.pdf",
+        "source": "adala",
+        "nom_adala": "Code de commerce",
+        "maj_adala": "2026-04-28"
+      }
+    },
+    "code_route": {
+      "titre": "Code de la route (loi 52-05)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2025/06/11/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%201.10.07%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2052.05%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%20%D8%A8%D9%85%D8%AF%D9%88%D9%86%D8%A9%20%D8%A7%D9%84%D8%B3%D9%8A%D8%B1%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%B7%D8%B1%D9%82%20-1749642259749.pdf",
+        "source": "adala",
+        "nom_adala": "ظهير شريف بتنفيذ القانون رقم 52.05 المتعلق بمدونة السير على الطرق",
+        "maj_adala": "2026-05-22"
+      },
+      "fr": {
+        "url": "A_COMPLETER",
+        "source": "narsa.ma / sgg.gov.ma",
+        "note": "Ancien portail Adala HTML mort (404). Pas de PDF FR consolidé trouvé sur les sites gouvernementaux. Traduction FR initiale au B.O. 5874 du 16/09/2010 (sans amendements 116-14). La version AR Adala (consolidée) fait référence."
+      }
+    },
+    "droits_reels": {
+      "titre": "Code des droits réels (loi 39-08)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2025/12/03/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%D8%B1%D9%82%D9%85%201.11.178%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2039.08%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%20%D8%A8%D9%85%D8%AF%D9%88%D9%86%D8%A9%20%D8%A7%D9%84%D8%AD%D9%82%D9%88%D9%82%20%D8%A7%D9%84%D8%B9%D9%8A%D9%86%D9%8A%D8%A9-1764772746491.pdf",
+        "source": "adala",
+        "nom_adala": "القانون المتعلق بمدونة الحقوق العينية",
+        "maj_adala": "2026-03-24"
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/03/05/Code%20des%20droits%20r%C3%A9els-1709645301691.pdf",
+        "source": "adala",
+        "nom_adala": "Code des droits réels",
+        "maj_adala": "2025-11-25"
+      }
+    },
+    "organisation_judiciaire": {
+      "titre": "Organisation judiciaire (loi 38-15)",
+      "tier": 1,
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2026/03/25/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%D8%B1%D9%82%D9%85%201.22.38%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2038.15-1774431886496.pdf",
+        "source": "adala",
+        "nom_adala": "ظهير شريف بتنفيذ القانون رقم 38.15 المتعلق بالتنظيم القضائي",
+        "maj_adala": "2026-03-25"
+      },
+      "fr": {
+        "url": "A_COMPLETER",
+        "source": "sgg.gov.ma",
+        "note": "Traduction officielle FR publiée au B.O. édition traduction officielle (loi 38-15, B.O. AR 7108 du 14/07/2022). Récupérer le PDF du B.O. FR correspondant sur sgg.gov.ma > Bulletin Officiel."
+      }
+    },
+    "immatriculation_fonciere": {
+      "titre": "Immatriculation foncière (dahir du 12/08/1913 tel que modifié par la loi 14-07)",
+      "tier": 1,
+      "annexe_de": "droits_reels",
+      "note": "Le livre « القانون العقاري الجديد » du pack imprimé regroupe la loi 39-08 ET le régime de l'immatriculation.",
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2026/03/19/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%20%D8%A8%D8%A7%D9%84%D8%AA%D8%AD%D9%81%D9%8A%D8%B8%20%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%D9%8A-1773931844340.pdf",
+        "source": "adala",
+        "nom_adala": "ظهير متعلق بالتحفيظ العقاري",
+        "maj_adala": "2026-03-24"
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/03/19/Immatriculation%20fonci%C3%A8re-1710848548570.pdf",
+        "source": "adala",
+        "nom_adala": "Immatriculation foncière",
+        "maj_adala": "2025-11-25"
+      }
+    },
+    "travailleurs_domestiques": {
+      "titre": "Travailleurs domestiques (loi 19-12)",
+      "tier": 1,
+      "annexe_de": "code_travail",
+      "note": "Annexe du livre « مدونة الشغل الجديدة » du pack imprimé.",
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/09/05/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%D8%A7%D9%84%D8%AA%D8%B4%D8%BA%D9%8A%D9%84%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%D8%A9%20%D8%A8%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D9%84%D8%A7%D8%AA%20%D9%88%D8%A7%D9%84%D8%B9%D9%85%D8%A7%D9%84%20%D8%A7%D9%84%D9%85%D9%86%D8%B2%D9%84%D9%8A%D9%8A%D9%86-1725546632387.pdf",
+        "source": "adala",
+        "nom_adala": "قانون بتحديد شروط الشغل والتشغيل المتعلقة بالعاملات والعمال المنزليين",
+        "maj_adala": "2025-11-17"
+      },
+      "fr": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2024/03/01/Conditions%20de%20travail%20et%20d%27mploi%20des%20travailleuses%20et%20travail-1709304131036.pdf",
+        "source": "adala",
+        "nom_adala": "Conditions de travail et d'emploi des travailleuses et travailleurs domestiques",
+        "maj_adala": "2025-11-10"
+      }
+    },
+    "accidents_travail": {
+      "titre": "Réparation des accidents du travail (loi 18-12)",
+      "tier": 1,
+      "annexe_de": "code_travail",
+      "note": "Annexe du livre « مدونة الشغل الجديدة ». Pas de version FR sur Adala.",
+      "ar": {
+        "url": "https://adala.justice.gov.ma/api/uploads/2025/12/16/%D8%B8%D9%80%D9%80%D9%87%D9%80%D9%80%D9%8A%D9%80%D8%B1%20%D8%B4%D9%80%D8%B1%D9%8A%D9%80%D9%81%20%D8%B1%D9%82%D9%80%D9%85%201.14.190%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2018.12%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82-1765874452213.pdf",
+        "source": "adala",
+        "nom_adala": "القانون المتعلق بالتعويض عن حوادث الشغل",
+        "maj_adala": "2025-12-16"
+      }
+    }
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "constitution_2011_ar": {
+    "sha256": "df3fa3c9547dabc2e69aa179b938ed583c9d462e592113304f2f7960efccc9e8",
+    "octets": 12019312,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/01/30/%D8%A7%D9%84%D8%AF%D8%B3%D8%AA%D9%88%D8%B1-1706626006826.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "constitution_2011_fr": {
+    "sha256": "fd6f2f4c1cf16b707e963ca91bdd1baeac75a29ec250a0627888ecdb082722b5",
+    "octets": 5172094,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/02/28/costitution-1709118294788.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "code_penal_ar": {
+    "sha256": "5e099dad87748c98b5e8321f7b33afa17d33b6588d22520f2b2928ba900fb424",
+    "octets": 3850153,
+    "url": "https://adala.justice.gov.ma/api/uploads/2025/03/14/%D8%B8%D9%80%D9%87%D9%8A%D8%B1%20%D8%B4%D9%80%D8%B1%D9%8A%D9%81%20%D8%B1%D9%82%D9%85%201.59.413%20%D8%A8%D8%A7%D9%84%D9%85%D8%B5%D8%A7%D8%AF%D9%82%D8%A9%20%D8%B9%D9%84%D9%89%20%D9%85%D8%AC%D9%85%D9%88%D8%B9%D8%A9%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D9%84%D8%AC%D9%86%D8%A7%D8%A6%D9%8A-1741952873602.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "code_penal_fr": {
+    "sha256": "23aaaa31bffd348ba953027e185d28d31d3ed5b47ebcd116785a2aa87949b07b",
+    "octets": 3564778,
+    "url": "https://adala.justice.gov.ma/api/uploads/2025/04/03/Dahir%20n%C2%B0%201-59-413%20portant%20approbation%20du%20texte%20du%20code%20penal-1743685280109.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "procedure_penale_ar": {
+    "sha256": "870fe72a4e785da4162d339652b6080b3d22fc4d10018b1b0d958ecd5c474e9a",
+    "octets": 6075690,
+    "url": "https://adala.justice.gov.ma/api/uploads/2025/12/03/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%D8%B1%D9%82%D9%85%201.02.255%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2022.01%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%20%D8%A8%D8%A7%D9%84%D9%85%D8%B3%D8%B7%D8%B1%D8%A9%20%D8%A7%D9%84%D8%AC%D9%86%D8%A7%D8%A6%D9%8A%D8%A9-1764773243438.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "procedure_penale_fr": {
+    "sha256": "66fd04e3f18b8a651efa6bf3a1b26bba16a9e1122c6e39fec8300cc5c7ab03a3",
+    "octets": 1730458,
+    "url": "https://www.vertic.org/media/National%20Legislation/Morocco/MA_Criminal_Procedure_Code.pdf",
+    "source": "miroir_non_officiel (vertic.org)",
+    "telecharge_le": "2026-06-11"
+  },
+  "doc_ar": {
+    "sha256": "1c1f2f01cab1b499c9812bb41b8f5ea774480a3acc017d442a061af9673a6991",
+    "octets": 2598209,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/10/24/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%A8%D9%85%D8%AB%D8%A7%D8%A8%D8%A9%20%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%A7%D9%84%D8%A7%D9%84%D8%AA%D8%B2%D8%A7%D9%85%D8%A7%D8%AA%20%D9%88%D8%A7%D9%84%D8%B9%D9%82%D9%88%D8%AF-1729777400387.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "doc_fr": {
+    "sha256": "9cc77a8bc445e6d4eaa9604e5350f6851ace35244adc46fa067eb2bc032710f1",
+    "octets": 1335386,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/02/28/Code%20des%20Obligations%20et%20des%20Contrats_compressed-1709126934943.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "moudawana_ar": {
+    "sha256": "a6d5bd1c0f8e7320493d974c702cb874fbbeab07a730bf6c094002635e96a18f",
+    "octets": 950804,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/07/22/%D9%85%D8%AF%D9%88%D9%86%D8%A9%20%D8%A7%D9%84%D8%A3%D8%B3%D8%B1%D8%A9-1721646687560.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "moudawana_fr": {
+    "sha256": "b335d2c0163647fc6cf8f4496dfd273c6a5179a2e2728d0a93b325d81193b9eb",
+    "octets": 2260028,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/12/12/DAHIR%20N%C2%B0%201-04-22%20PORTANT%20PROMULGATION%20DE%20LA%20LOI.PDF-1734012188728.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "code_travail_ar": {
+    "sha256": "61d5b5d86d279ca17cfd7d69d218f0b845fa82ed58f4c228f460cf336ee14ea4",
+    "octets": 3088938,
+    "url": "https://miepeec.gov.ma/wp-content/uploads/2019/08/code_travail.pdf",
+    "source": "miepeec.gov.ma (ministère de l'Inclusion économique et de l'Emploi)",
+    "telecharge_le": "2026-06-11"
+  },
+  "code_travail_fr": {
+    "sha256": "91c67dd23c5a2d9aa01c997542ed547b4077135c2528baf74e2a385ea5dfc8f3",
+    "octets": 1515526,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/04/30/code%20du%20travail-1714463246806.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "code_commerce_ar": {
+    "sha256": "0dab0eee87f2075d66715b7535e8819c6aa97a32ca52882bfdf0cd1f80023f18",
+    "octets": 3401184,
+    "url": "https://adala.justice.gov.ma/api/uploads/2026/05/25/%D8%B8%D9%80%D9%80%D9%87%D9%80%D9%80%D9%8A%D9%80%D9%80%D8%B1%20%D8%B4%D9%80%D9%80%D8%B1%D9%8A%D9%80%D9%80%D9%81%20%D8%B1%D9%82%D9%80%D9%80%D9%85%201.96.83%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2015.95-1779718527894.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "code_commerce_fr": {
+    "sha256": "e02151d1b3d585a8ed888dca187172d1c8fc682f02c4537131f2b95c3cde1696",
+    "octets": 1065610,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/03/01/Code%20de%20commerce_compressed-1709282723074.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "code_route_ar": {
+    "sha256": "20d808d759e1394651cb4f565a3cccdf1952ac7b12b1efab395c606846209e80",
+    "octets": 42306394,
+    "url": "https://adala.justice.gov.ma/api/uploads/2025/06/11/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%201.10.07%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2052.05%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%20%D8%A8%D9%85%D8%AF%D9%88%D9%86%D8%A9%20%D8%A7%D9%84%D8%B3%D9%8A%D8%B1%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%B7%D8%B1%D9%82%20-1749642259749.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "droits_reels_ar": {
+    "sha256": "eacc26332f709138bbf4483fd4533834f4dd86dc179580030abc3f6575b78416",
+    "octets": 1875030,
+    "url": "https://adala.justice.gov.ma/api/uploads/2025/12/03/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%D8%B1%D9%82%D9%85%201.11.178%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2039.08%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%20%D8%A8%D9%85%D8%AF%D9%88%D9%86%D8%A9%20%D8%A7%D9%84%D8%AD%D9%82%D9%88%D9%82%20%D8%A7%D9%84%D8%B9%D9%8A%D9%86%D9%8A%D8%A9-1764772746491.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "droits_reels_fr": {
+    "sha256": "49102a99d54d950d207c65acab76a0c181c7f3a0b2034746510691c9c3d6f0d4",
+    "octets": 6620317,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/03/05/Code%20des%20droits%20r%C3%A9els-1709645301691.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "organisation_judiciaire_ar": {
+    "sha256": "272c9d3403e590412998f398b199acbf6ef4449ec76a8f1b1c97174f177a0f18",
+    "octets": 9969421,
+    "url": "https://adala.justice.gov.ma/api/uploads/2026/03/25/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%D8%B1%D9%82%D9%85%201.22.38%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2038.15-1774431886496.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "immatriculation_fonciere_ar": {
+    "sha256": "5756056853ee705c4b8c0b6bea58849d0898a695d3393f986122ec2a4dad5402",
+    "octets": 805172,
+    "url": "https://adala.justice.gov.ma/api/uploads/2026/03/19/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%20%D8%A8%D8%A7%D9%84%D8%AA%D8%AD%D9%81%D9%8A%D8%B8%20%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%D9%8A-1773931844340.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "immatriculation_fonciere_fr": {
+    "sha256": "53c1e1f7cb20f40ca0f0319a5a7ef918730592d35f5ad3955e688d7acbaa5546",
+    "octets": 4393334,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/03/19/Immatriculation%20fonci%C3%A8re-1710848548570.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "travailleurs_domestiques_ar": {
+    "sha256": "b6e2fcae25e32d84abdf8ed06f609c2618353e5fac20de7517e610f4ca4bdfc9",
+    "octets": 565666,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/09/05/%D8%B8%D9%87%D9%8A%D8%B1%20%D8%B4%D8%B1%D9%8A%D9%81%20%D8%A7%D9%84%D8%AA%D8%B4%D8%BA%D9%8A%D9%84%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82%D8%A9%20%D8%A8%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D9%84%D8%A7%D8%AA%20%D9%88%D8%A7%D9%84%D8%B9%D9%85%D8%A7%D9%84%20%D8%A7%D9%84%D9%85%D9%86%D8%B2%D9%84%D9%8A%D9%8A%D9%86-1725546632387.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "travailleurs_domestiques_fr": {
+    "sha256": "7a04878cc3d377d61cb3ce2e7b99c8bc05d3e4d645ec5f1606f3b1cb80dd7ed3",
+    "octets": 1585241,
+    "url": "https://adala.justice.gov.ma/api/uploads/2024/03/01/Conditions%20de%20travail%20et%20d%27mploi%20des%20travailleuses%20et%20travail-1709304131036.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  },
+  "accidents_travail_ar": {
+    "sha256": "2b4591fd8a8680c84527b7e179691353aed85728a71a52e90a375ac711c03347",
+    "octets": 15180258,
+    "url": "https://adala.justice.gov.ma/api/uploads/2025/12/16/%D8%B8%D9%80%D9%80%D9%87%D9%80%D9%80%D9%8A%D9%80%D8%B1%20%D8%B4%D9%80%D8%B1%D9%8A%D9%80%D9%81%20%D8%B1%D9%82%D9%80%D9%85%201.14.190%20%D8%A8%D8%AA%D9%86%D9%81%D9%8A%D8%B0%20%D8%A7%D9%84%D9%82%D8%A7%D9%86%D9%88%D9%86%20%D8%B1%D9%82%D9%85%2018.12%20%D8%A7%D9%84%D9%85%D8%AA%D8%B9%D9%84%D9%82-1765874452213.pdf",
+    "source": "adala",
+    "telecharge_le": "2026-06-11"
+  }
+}

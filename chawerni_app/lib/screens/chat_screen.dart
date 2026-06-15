@@ -1,0 +1,463 @@
+import 'package:flutter/material.dart';
+
+import '../config/app_config.dart';
+import '../data/api_service.dart';
+import '../data/lang.dart';
+import '../data/scenarios.dart';
+import '../data/strings.dart';
+import '../state/app_scope.dart';
+import '../theme/tokens.dart';
+import '../theme/typography.dart';
+import '../widgets/alert_banner.dart';
+import '../widgets/chat_bubble.dart';
+import '../widgets/chw_chip.dart';
+import '../widgets/chw_icon.dart';
+import '../widgets/lang_switcher.dart';
+import '../widgets/logo_mark.dart';
+import '../widgets/source_card.dart';
+import '../widgets/thinking_dots.dart';
+import '../widgets/article_sheet.dart';
+import '../widgets/zellij_frieze.dart';
+
+/// Un échange du fil. Deux origines possibles :
+///   - scripté (`scenario`) : démo hors-ligne, textes de loi intégrés ;
+///   - live (`apiAnswer`) : réponse réelle de l'API /ask.
+/// `error` porte la micro-copy « connexion perdue ».
+class _Exchange {
+  final String userText; // question affichée dans la bulle utilisateur
+  bool thinking;
+  Scenario? scenario;
+  ApiAnswer? apiAnswer;
+  String? error;
+  _Exchange({required this.userText, this.scenario}) : thinking = true;
+}
+
+/// Écran principal — le Chat. En présence d'une API (`CHAWERNI_API_BASE`), les
+/// questions partent au backend RAG ; sinon, scénarios scriptés (démo).
+class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final List<_Exchange> _exchanges = [];
+  final ScrollController _scroll = ScrollController();
+  final TextEditingController _input = TextEditingController();
+  final ApiService _api = ApiService();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    _input.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Question déposée depuis Hoquqi → la poser une fois, après la frame.
+    final app = AppScope.of(context);
+    if (app.pendingQuestion != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final q = app.consumePendingQuestion();
+        if (q != null && mounted) _send(q, app.lang);
+      });
+    }
+  }
+
+  // --- Scripté (démo sans backend) -----------------------------------------
+
+  void _askScenario(Scenario sc, Lang lang) {
+    setState(() => _exchanges.add(_Exchange(userText: sc.chip(lang), scenario: sc)));
+    _scrollToEnd();
+    Future.delayed(const Duration(milliseconds: 1400), () {
+      if (!mounted) return;
+      setState(() => _exchanges.last.thinking = false);
+      _scrollToEnd();
+    });
+  }
+
+  // --- Live (API RAG) ------------------------------------------------------
+
+  Future<void> _askApi(String question, Lang lang) async {
+    final ex = _Exchange(userText: question);
+    setState(() => _exchanges.add(ex));
+    _scrollToEnd();
+    try {
+      final ans = await _api.ask(question, lang);
+      if (!mounted) return;
+      setState(() {
+        ex.apiAnswer = ans;
+        ex.thinking = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        ex.error = T(lang).netError;
+        ex.thinking = false;
+      });
+    }
+    _scrollToEnd();
+  }
+
+  void _send(String text, Lang lang) {
+    final q = text.trim();
+    if (q.isEmpty) return;
+    if (AppConfig.hasApi) {
+      _askApi(q, lang);
+    } else {
+      // Démo : aiguillage par mot-clé vers un scénario.
+      Scenario pick = kScenarios.first;
+      final lc = q.toLowerCase();
+      if (lc.contains('divorce') || q.contains('طلاق')) {
+        pick = kScenarios[1];
+      } else if (lc.contains('loyer') || lc.contains('bail') || q.contains('كراء')) {
+        pick = kScenarios[2];
+      }
+      _askScenario(pick, lang);
+    }
+  }
+
+  void _onChip(Scenario sc, Lang lang) {
+    if (AppConfig.hasApi) {
+      _askApi(sc.chip(lang), lang);
+    } else {
+      _askScenario(sc, lang);
+    }
+  }
+
+  void _submitTyped(Lang lang) {
+    final q = _input.text;
+    _input.clear();
+    FocusScope.of(context).unfocus();
+    _send(q, lang);
+  }
+
+  void _scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) {
+        _scroll.animateTo(_scroll.position.maxScrollExtent,
+            duration: S.durationBase, curve: S.easeOut);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final app = AppScope.of(context);
+    final t = T(app.lang);
+    final empty = _exchanges.isEmpty;
+
+    return Column(
+      children: [
+        _ChatHeader(lang: app.lang, onLang: app.setLang),
+        Expanded(
+          child: empty
+              ? _emptyState(t)
+              : ListView.separated(
+                  controller: _scroll,
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+                  itemCount: _exchanges.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, i) =>
+                      _buildExchange(_exchanges[i], app.lang, t),
+                ),
+        ),
+        if (empty) _starterChips(app.lang),
+        _inputBar(t, app.lang),
+      ],
+    );
+  }
+
+  Widget _emptyState(T t) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Opacity(opacity: 0.9, child: LogoMark(size: 56)),
+            const SizedBox(height: 16),
+            Text(t.emptyTitle,
+                textAlign: TextAlign.center,
+                style: Typo.style(size: Typo.lg, weight: Typo.bold, color: C.midad)),
+            const SizedBox(height: 6),
+            Text(t.emptySub,
+                textAlign: TextAlign.center,
+                style: Typo.style(size: Typo.sm, color: C.midad60, height: 1.55)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExchange(_Exchange ex, Lang lang, T t) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ChatBubble(text: ex.userText, isUser: true),
+        const SizedBox(height: 12),
+        if (ex.thinking)
+          ThinkingDots(labels: t.thinking)
+        else if (ex.error != null)
+          _errorBubble(ex, lang, t)
+        else if (ex.apiAnswer != null)
+          ..._apiAnswerWidgets(ex.apiAnswer!, lang, t)
+        else if (ex.scenario != null)
+          ..._scenarioWidgets(ex.scenario!, lang, t),
+      ],
+    );
+  }
+
+  // --- Rendu réponse live --------------------------------------------------
+
+  List<Widget> _apiAnswerWidgets(ApiAnswer a, Lang lang, T t) {
+    return [
+      ChatBubble(text: a.answer, isUser: false),
+      for (final s in a.sources) ...[
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(end: 36),
+          child: SourceCard(
+            num: '${s.marqueur} ${s.articleNum}',
+            code: codeLabel(s.code, lang),
+            excerpt: s.excerpt,
+            date: s.version,
+            unfold: true,
+            onTap: () => showApiArticleSheet(context,
+                api: _api, code: s.code, article: s.articleNum, appLang: lang),
+          ),
+        ),
+      ],
+      if (a.grave && a.lawyerBanner != null) ...[
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(end: 36),
+          child: AlertBanner(
+            title: 'هاد الموضوع مهم بزاف',
+            body: a.lawyerBanner!,
+            actionLabel: t.findLawyer,
+          ),
+        ),
+      ],
+      const SizedBox(height: 10),
+      Text(a.disclaimer,
+          style: Typo.style(size: Typo.xs, color: C.midad30, height: 1.4)),
+      const SizedBox(height: 4),
+      if (!a.refused)
+        Text(T.sent,
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.rtl,
+            style: Typo.style(size: Typo.xs, color: C.midad30)),
+    ];
+  }
+
+  Widget _errorBubble(_Exchange ex, Lang lang, T t) {
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ChatBubble(text: ex.error!, isUser: false),
+          const SizedBox(height: 8),
+          ChwChip(
+            label: lang == Lang.fr ? 'Réessayer' : 'عاود المحاولة',
+            onTap: () {
+              setState(() {
+                ex.error = null;
+                ex.thinking = true;
+              });
+              _retry(ex, lang);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _retry(_Exchange ex, Lang lang) async {
+    try {
+      final ans = await _api.ask(ex.userText, lang);
+      if (!mounted) return;
+      setState(() {
+        ex.apiAnswer = ans;
+        ex.thinking = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        ex.error = T(lang).netError;
+        ex.thinking = false;
+      });
+    }
+    _scrollToEnd();
+  }
+
+  // --- Rendu réponse scriptée (démo) ---------------------------------------
+
+  List<Widget> _scenarioWidgets(Scenario sc, Lang lang, T t) {
+    return [
+      ChatBubble(text: sc.reply(lang), isUser: false),
+      for (final s in sc.sources) ...[
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(end: 36),
+          child: SourceCard(
+            num: s.num(lang),
+            code: s.code(lang),
+            excerpt: s.excerpt(lang),
+            date: s.date(lang),
+            unfold: true,
+            onTap: () => showArticleSheet(context, source: s, appLang: lang),
+          ),
+        ),
+      ],
+      if (sc.banner != null) ...[
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(end: 36),
+          child: AlertBanner(
+            title: sc.banner!.title(lang),
+            body: sc.banner!.body(lang),
+            actionLabel: t.findLawyer,
+          ),
+        ),
+      ],
+      if (sc.followUp != null) ...[
+        const SizedBox(height: 12),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: ChwChip(label: sc.followUp!(lang), onTap: () {}),
+        ),
+      ],
+      const SizedBox(height: 8),
+      Text(T.sent,
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.rtl,
+          style: Typo.style(size: Typo.xs, color: C.midad30)),
+    ];
+  }
+
+  Widget _starterChips(Lang lang) {
+    return SizedBox(
+      height: 52,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        itemCount: kScenarios.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, i) => Center(
+          child: ChwChip(
+            label: kScenarios[i].chip(lang),
+            onTap: () => _onChip(kScenarios[i], lang),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _inputBar(T t, Lang lang) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: C.surfaceCard,
+                  borderRadius: BorderRadius.circular(S.radiusPill),
+                  border: Border.all(color: C.borderCard),
+                  boxShadow: S.shadowSoft,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: TextField(
+                  controller: _input,
+                  cursorColor: C.nila,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => _submitTyped(lang),
+                  style: Typo.style(size: Typo.base, color: C.midad),
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 13),
+                    border: InputBorder.none,
+                    hintText: t.placeholder,
+                    hintStyle: Typo.style(size: Typo.base, color: C.midad30),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: () => _submitTyped(lang),
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(color: C.nila, shape: BoxShape.circle),
+                child: const Center(
+                  child: ChwIcon('send', size: 20, color: Colors.white, mirrorInRtl: true),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Header du chat : fond nila, frise zellige blanche, wordmark, sélecteur.
+class _ChatHeader extends StatelessWidget {
+  final Lang lang;
+  final ValueChanged<Lang> onLang;
+  const _ChatHeader({required this.lang, required this.onLang});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: C.nila,
+      child: SafeArea(
+        bottom: false,
+        child: SizedBox(
+          height: 56,
+          child: Stack(
+            children: [
+              const ZellijFrieze.onNila(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const LogoMark.warqa(size: 34),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('شاورني',
+                              textDirection: TextDirection.rtl,
+                              style: Typo.style(
+                                  size: 18, weight: Typo.citation, color: Colors.white)),
+                          Text('CHAWERNI',
+                              style: Typo.style(
+                                  size: 9,
+                                  weight: Typo.medium,
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                  letterSpacing: 2)),
+                        ],
+                      ),
+                    ),
+                    LangSwitcher(value: lang, onChange: onLang, inverse: true),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

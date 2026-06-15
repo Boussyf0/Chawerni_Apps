@@ -1,0 +1,39 @@
+# ===== Secrets (NE JAMAIS committer) =====
+.env
+**/.env
+!.env.example
+
+# ===== OS =====
+.DS_Store
+**/.DS_Store
+
+# ===== Outillage local Claude =====
+.claude/
+
+# ===== Python / RAG =====
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+**/.venv/
+
+# Base Qdrant locale (régénérable : python -m rag.index)
+rag/.qdrant/
+
+# ===== Flutter (gros artefacts régénérables) =====
+chawerni_app/build/
+chawerni_app/.dart_tool/
+chawerni_app/.flutter-plugins
+chawerni_app/.flutter-plugins-dependencies
+chawerni_app/ios/Pods/
+chawerni_app/ios/.symlinks/
+chawerni_app/ios/Flutter/ephemeral/
+chawerni_app/ios/Flutter/Generated.xcconfig
+chawerni_app/ios/Flutter/flutter_export_environment.sh
+chawerni_app/macos/Pods/
+
+# ===== Design system : extraction régénérable depuis les zips =====
+Prototype_chawarni/_extracted/
+
+# ===== Aperçus/temp =====
+**/_preview_*.png

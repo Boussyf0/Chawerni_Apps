@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+  <!-- Chawerni — bulle de dialogue (« شاورني / consulte-moi ») dont la queue
+       se prolonge en frise de losanges zellige ; dernier losange en zaafran
+       (chaleur / citation). Primaire nila #2D3A8C. -->
+  <rect x="14" y="12" width="62" height="46" rx="15" fill="#2D3A8C"/>
+  <rect x="20.5" y="50.5" width="17" height="17" rx="3" transform="rotate(45 29 59)" fill="#2D3A8C"/>
+  <rect x="36" y="64" width="12" height="12" rx="2.5" transform="rotate(45 42 70)" fill="#2D3A8C"/>
+  <rect x="51" y="76.5" width="9" height="9" rx="2" transform="rotate(45 55.5 81)" fill="#E8A13D"/>
+</svg>

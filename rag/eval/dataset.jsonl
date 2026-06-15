@@ -1,0 +1,50 @@
+{"id": 1, "question": "Que dit l'article 505 du code pénal ?", "langue": "fr", "type": "exact", "expected": [{"code": "code_penal", "article": 505}]}
+{"id": 2, "question": "article 52 du code du travail", "langue": "fr", "type": "exact", "expected": [{"code": "code_travail", "article": 52}]}
+{"id": 3, "question": "Article 114 de la Moudawana", "langue": "fr", "type": "exact", "expected": [{"code": "moudawana", "article": 114}]}
+{"id": 4, "question": "Que prévoit l'article 19 de la Constitution ?", "langue": "fr", "type": "exact", "expected": [{"code": "constitution_2011", "article": 19}]}
+{"id": 5, "question": "article 627 du DOC", "langue": "fr", "type": "exact", "expected": [{"code": "doc", "article": 627}]}
+{"id": 6, "question": "ماذا ينص عليه الفصل 392 من القانون الجنائي؟", "langue": "ar", "type": "exact", "expected": [{"code": "code_penal", "article": 392}]}
+{"id": 7, "question": "المادة 52 من مدونة الشغل", "langue": "ar", "type": "exact", "expected": [{"code": "code_travail", "article": 52}]}
+{"id": 8, "question": "المادة 114 من مدونة الأسرة", "langue": "ar", "type": "exact", "expected": [{"code": "moudawana", "article": 114}]}
+{"id": 9, "question": "الفصل 540 من القانون الجنائي يتحدث عن ماذا؟", "langue": "ar", "type": "exact", "expected": [{"code": "code_penal", "article": 540}]}
+{"id": 10, "question": "article 209 du code de la famille", "langue": "fr", "type": "exact", "expected": [{"code": "moudawana", "article": 209}]}
+{"id": 11, "question": "المادة 163 من مدونة الأسرة", "langue": "ar", "type": "exact", "expected": [{"code": "moudawana", "article": 163}]}
+{"id": 12, "question": "article 432 du code pénal", "langue": "fr", "type": "exact", "expected": [{"code": "code_penal", "article": 432}]}
+{"id": 13, "question": "Quels sont mes droits si je suis licencié ?", "langue": "fr", "type": "semantic", "expected": [{"code": "code_travail", "article": 52}, {"code": "code_travail", "article": 41}, {"code": "code_travail", "article": 53}]}
+{"id": 14, "question": "Comment se calcule l'indemnité de licenciement ?", "langue": "fr", "type": "semantic", "expected": [{"code": "code_travail", "article": 53}, {"code": "code_travail", "article": 52}, {"code": "code_travail", "article": 55}]}
+{"id": 15, "question": "Le divorce par consentement mutuel, comment ça marche ?", "langue": "fr", "type": "semantic", "expected": [{"code": "moudawana", "article": 114}]}
+{"id": 16, "question": "À quel âge peut-on se marier au Maroc ?", "langue": "fr", "type": "semantic", "expected": [{"code": "moudawana", "article": 19}]}
+{"id": 17, "question": "À qui revient la garde des enfants après un divorce ?", "langue": "fr", "type": "semantic", "expected": [{"code": "moudawana", "article": 171}, {"code": "moudawana", "article": 163}, {"code": "moudawana", "article": 164}]}
+{"id": 18, "question": "Quelle est la peine pour un vol ?", "langue": "fr", "type": "semantic", "expected": [{"code": "code_penal", "article": 505}, {"code": "code_penal", "article": 506}, {"code": "code_penal", "article": 507}, {"code": "code_penal", "article": 508}, {"code": "code_penal", "article": 509}, {"code": "code_penal", "article": 510}]}
+{"id": 19, "question": "Qu'est-ce que l'escroquerie en droit pénal marocain ?", "langue": "fr", "type": "semantic", "expected": [{"code": "code_penal", "article": 540}]}
+{"id": 20, "question": "Que dit la loi sur l'homicide involontaire ?", "langue": "fr", "type": "semantic", "expected": [{"code": "code_penal", "article": 432}]}
+{"id": 21, "question": "L'homme et la femme sont-ils égaux devant la loi ?", "langue": "fr", "type": "semantic", "expected": [{"code": "constitution_2011", "article": 19}]}
+{"id": 22, "question": "Qu'est-ce qu'un contrat de louage de choses ?", "langue": "fr", "type": "semantic", "expected": [{"code": "doc", "article": 627}, {"code": "doc", "article": 626}]}
+{"id": 23, "question": "Quel est l'âge de la majorité légale au Maroc ?", "langue": "fr", "type": "semantic", "expected": [{"code": "moudawana", "article": 209}]}
+{"id": 24, "question": "Qu'est-ce que la légitime défense ?", "langue": "fr", "type": "semantic", "expected": [{"code": "code_penal", "article": 125}]}
+{"id": 25, "question": "ما هي حقوقي عند الفصل من العمل؟", "langue": "ar", "type": "semantic", "expected": [{"code": "code_travail", "article": 52}, {"code": "code_travail", "article": 41}]}
+{"id": 26, "question": "كيف يتم الطلاق بالاتفاق؟", "langue": "ar", "type": "semantic", "expected": [{"code": "moudawana", "article": 114}]}
+{"id": 27, "question": "ما هو سن الزواج في المغرب؟", "langue": "ar", "type": "semantic", "expected": [{"code": "moudawana", "article": 19}]}
+{"id": 28, "question": "لمن تُسند حضانة الأطفال بعد الطلاق؟", "langue": "ar", "type": "semantic", "expected": [{"code": "moudawana", "article": 171}, {"code": "moudawana", "article": 163}]}
+{"id": 29, "question": "ما عقوبة السرقة في القانون المغربي؟", "langue": "ar", "type": "semantic", "expected": [{"code": "code_penal", "article": 505}, {"code": "code_penal", "article": 506}, {"code": "code_penal", "article": 507}, {"code": "code_penal", "article": 508}, {"code": "code_penal", "article": 509}, {"code": "code_penal", "article": 510}]}
+{"id": 30, "question": "ما هي جريمة النصب؟", "langue": "ar", "type": "semantic", "expected": [{"code": "code_penal", "article": 540}]}
+{"id": 31, "question": "هل الرجل والمرأة متساويان أمام القانون؟", "langue": "ar", "type": "semantic", "expected": [{"code": "constitution_2011", "article": 19}]}
+{"id": 32, "question": "ما المقصود بعقد الكراء؟", "langue": "ar", "type": "semantic", "expected": [{"code": "doc", "article": 627}]}
+{"id": 33, "question": "شنو حقوقي إلا تفصلت من الخدمة؟", "langue": "ar", "type": "darija", "expected": [{"code": "code_travail", "article": 52}, {"code": "code_travail", "article": 41}]}
+{"id": 34, "question": "كيفاش كيتحسب تعويض الفصل؟", "langue": "ar", "type": "darija", "expected": [{"code": "code_travail", "article": 53}, {"code": "code_travail", "article": 52}]}
+{"id": 35, "question": "بغيت نعرف الطلاق بالاتفاق كيفاش كيتدار", "langue": "ar", "type": "darija", "expected": [{"code": "moudawana", "article": 114}]}
+{"id": 36, "question": "فأي سن يقدر يتزوج الواحد فالمغرب؟", "langue": "ar", "type": "darija", "expected": [{"code": "moudawana", "article": 19}]}
+{"id": 37, "question": "منشكون كتمشي ليه الحضانة ديال الدراري؟", "langue": "ar", "type": "darija", "expected": [{"code": "moudawana", "article": 171}, {"code": "moudawana", "article": 163}]}
+{"id": 38, "question": "شحال كياخد اللي سرق ديال عقوبة؟", "langue": "ar", "type": "darija", "expected": [{"code": "code_penal", "article": 505}, {"code": "code_penal", "article": 506}, {"code": "code_penal", "article": 507}, {"code": "code_penal", "article": 508}, {"code": "code_penal", "article": 509}, {"code": "code_penal", "article": 510}]}
+{"id": 39, "question": "أشنو هي جريمة النصب فالقانون؟", "langue": "ar", "type": "darija", "expected": [{"code": "code_penal", "article": 540}]}
+{"id": 40, "question": "واش الراجل والمرا بحال بحال فالقانون؟", "langue": "ar", "type": "darija", "expected": [{"code": "constitution_2011", "article": 19}]}
+{"id": 41, "question": "شنو كيقول القانون على القتل غير العمدي؟", "langue": "ar", "type": "darija", "expected": [{"code": "code_penal", "article": 432}]}
+{"id": 42, "question": "أشنو هو عقد الكراء بالضبط؟", "langue": "ar", "type": "darija", "expected": [{"code": "doc", "article": 627}]}
+{"id": 43, "question": "Comment déclarer mes impôts sur le revenu au Maroc ?", "langue": "fr", "type": "out_of_corpus", "expected": []}
+{"id": 44, "question": "Quelles démarches pour obtenir un passeport biométrique ?", "langue": "fr", "type": "out_of_corpus", "expected": []}
+{"id": 45, "question": "Comment créer une auto-entreprise au Maroc ?", "langue": "fr", "type": "out_of_corpus", "expected": []}
+{"id": 46, "question": "Quel est le taux de la TVA applicable aux services ?", "langue": "fr", "type": "out_of_corpus", "expected": []}
+{"id": 47, "question": "كيفاش نسجل علامة تجارية في المغرب؟", "langue": "ar", "type": "out_of_corpus", "expected": []}
+{"id": 48, "question": "ما هي شروط الحصول على الجنسية المغربية؟", "langue": "ar", "type": "out_of_corpus", "expected": []}
+{"id": 49, "question": "كيف أستفيد من التأمين الإجباري عن المرض AMO؟", "langue": "ar", "type": "out_of_corpus", "expected": []}
+{"id": 50, "question": "Comment obtenir un visa pour étudier en France ?", "langue": "fr", "type": "out_of_corpus", "expected": []}
