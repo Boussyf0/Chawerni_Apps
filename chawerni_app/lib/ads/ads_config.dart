@@ -49,6 +49,13 @@ class AdsConfig {
   /// Vrai si on sert des pubs de test (debug).
   static bool get usingTestIds => kDebugMode;
 
+  /// Appareils de DEV : reçoivent toujours des pubs de TEST (même en release),
+  /// donc cliquables sans risquer un ban du compte AdMob. Récupérer l'ID dans
+  /// les logs : `Use RequestConfiguration… setTestDeviceIds(…"<ID>"…)`.
+  static const testDeviceIds = <String>[
+    'DD1E38A987561D249BB17DD743A237DE', // Pixel d'Abderrahim
+  ];
+
   // --- Réglages de fréquence (protègent le compte AdMob d'un ban) ---
   /// Interstitiel : au plus 1 toutes les X questions de chat…
   static const interstitialEveryNQuestions = 3;

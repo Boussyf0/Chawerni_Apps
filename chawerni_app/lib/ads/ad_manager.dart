@@ -30,6 +30,10 @@ class AdManager {
   /// À appeler une fois au démarrage (après runApp).
   Future<void> init() async {
     await _requestConsent();
+    // Appareils de dev → pubs de TEST même en release (cliquables sans ban).
+    await MobileAds.instance.updateRequestConfiguration(
+      RequestConfiguration(testDeviceIds: AdsConfig.testDeviceIds),
+    );
     await MobileAds.instance.initialize();
     _ready = true;
     _loadInterstitial();
