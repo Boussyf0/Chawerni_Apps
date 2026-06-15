@@ -25,11 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <!-- AdMob — App ID de TEST Google. REMPLACER par le vrai App ID AdMob
-             (AdMob → Apps → App settings) avant publication. -->
+        <!-- AdMob — App ID RÉEL (compte Chawarni). Les pubs de test/réelles sont
+             choisies par AdsConfig selon debug/release. -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-8986402840311549~6876241989" />
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

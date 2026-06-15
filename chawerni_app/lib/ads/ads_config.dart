@@ -1,13 +1,19 @@
 import 'dart:io' show Platform;
 
-/// Identifiants AdMob. Par défaut = **IDs de TEST officiels Google** (sûrs, à
-/// utiliser en dev — ne jamais cliquer ses VRAIES pubs en test, ça fait bannir
-/// le compte). Les vrais IDs se passent à la compilation via --dart-define :
-///   flutter build apk --dart-define=ADMOB_BANNER_ANDROID=ca-app-pub-XXXX/YYYY …
+import 'package:flutter/foundation.dart' show kDebugMode;
+
+/// Identifiants AdMob.
 ///
-/// À remplacer aussi : l'App ID dans AndroidManifest.xml et ios/Runner/Info.plist.
+/// **Debug → IDs de TEST Google** (obligatoire : cliquer ses VRAIES pubs en dev
+/// fait bannir le compte). **Release → vrais IDs de prod.** Le basculement est
+/// automatique via `kDebugMode` — `flutter run` montre des pubs de test,
+/// `flutter build apk --release` montre les vraies.
+///
+/// App ID (réel) à mettre dans AndroidManifest.xml :
+///   ca-app-pub-8986402840311549~6876241989
+/// iOS : pas encore d'app AdMob iOS → on garde les IDs de test côté iOS.
 class AdsConfig {
-  // --- IDs de TEST Google (par format / plateforme) ---
+  // --- IDs de TEST officiels Google (utilisés en debug) ---
   static const _testBannerA = 'ca-app-pub-3940256099942544/6300978111';
   static const _testBannerI = 'ca-app-pub-3940256099942544/2934735716';
   static const _testInterA = 'ca-app-pub-3940256099942544/1033173712';
@@ -17,30 +23,31 @@ class AdsConfig {
   static const _testOpenA = 'ca-app-pub-3940256099942544/9257395921';
   static const _testOpenI = 'ca-app-pub-3940256099942544/5575463023';
 
-  // --- Vrais IDs (vides par défaut → on retombe sur les IDs de test) ---
-  static const _realBannerA = String.fromEnvironment('ADMOB_BANNER_ANDROID');
-  static const _realBannerI = String.fromEnvironment('ADMOB_BANNER_IOS');
-  static const _realInterA = String.fromEnvironment('ADMOB_INTERSTITIAL_ANDROID');
-  static const _realInterI = String.fromEnvironment('ADMOB_INTERSTITIAL_IOS');
-  static const _realRewardA = String.fromEnvironment('ADMOB_REWARDED_ANDROID');
-  static const _realRewardI = String.fromEnvironment('ADMOB_REWARDED_IOS');
-  static const _realOpenA = String.fromEnvironment('ADMOB_APPOPEN_ANDROID');
-  static const _realOpenI = String.fromEnvironment('ADMOB_APPOPEN_IOS');
+  // --- Vrais IDs de PROD (Android, compte pub-8986402840311549) ---
+  static const _prodBannerA = 'ca-app-pub-8986402840311549/4302049530';
+  static const _prodInterA = 'ca-app-pub-8986402840311549/9154879403';
+  static const _prodRewardA = 'ca-app-pub-8986402840311549/7626175313';
+  static const _prodOpenA = 'ca-app-pub-8986402840311549/9833536254';
 
-  static String _pick(String real, String test) => real.isNotEmpty ? real : test;
   static bool get _android => Platform.isAndroid;
 
-  static String get banner =>
-      _android ? _pick(_realBannerA, _testBannerA) : _pick(_realBannerI, _testBannerI);
-  static String get interstitial =>
-      _android ? _pick(_realInterA, _testInterA) : _pick(_realInterI, _testInterI);
-  static String get rewarded =>
-      _android ? _pick(_realRewardA, _testRewardA) : _pick(_realRewardI, _testRewardI);
-  static String get appOpen =>
-      _android ? _pick(_realOpenA, _testOpenA) : _pick(_realOpenI, _testOpenI);
+  // En debug : toujours test. En release : vrais IDs Android (iOS → test tant
+  // qu'aucune app AdMob iOS n'existe).
+  static String get banner => kDebugMode
+      ? (_android ? _testBannerA : _testBannerI)
+      : (_android ? _prodBannerA : _testBannerI);
+  static String get interstitial => kDebugMode
+      ? (_android ? _testInterA : _testInterI)
+      : (_android ? _prodInterA : _testInterI);
+  static String get rewarded => kDebugMode
+      ? (_android ? _testRewardA : _testRewardI)
+      : (_android ? _prodRewardA : _testRewardI);
+  static String get appOpen => kDebugMode
+      ? (_android ? _testOpenA : _testOpenI)
+      : (_android ? _prodOpenA : _testOpenI);
 
-  /// Vrai si on tourne encore sur les IDs de test (utile pour un bandeau debug).
-  static bool get usingTestIds => _pick(_realBannerA, '').isEmpty;
+  /// Vrai si on sert des pubs de test (debug).
+  static bool get usingTestIds => kDebugMode;
 
   // --- Réglages de fréquence (protègent le compte AdMob d'un ban) ---
   /// Interstitiel : au plus 1 toutes les X questions de chat…
