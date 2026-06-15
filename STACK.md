@@ -166,6 +166,39 @@ lent → mis en cache, ré-utilisé par le chunker).
 > **Pourquoi pas un LLM pour nettoyer l'arabe ?** Trop risqué (un LLM peut altérer
 > un texte juridique **qui fait foi**) et trop coûteux (~5 500 chunks AR × quota).
 
+### 4.4 Résultats sur tout le corpus (2026-06-15)
+OCR + re-chunk + ré-indexation des **13 codes AR** :
+- **~87 % des articles en OCR propre** par code (le reste = ancien texte conservé,
+  fidèle mais bruité). Exemple, Code du travail art. 52 :
+  - Avant : `ال مادة52 يس تحق الأجير … تعو يض ا ع ند فصله`
+  - Après : `المادة 52 يستحق الأجير المرتبط بعقد شغل غير محدد المدة، تعويضا عند فصله`
+- **`procedure_penale_ar` gardé en ORIGINAL** : l'OCR sur-segmentait (926 articles
+  détectés vs 771 en FR → faux en-têtes). `validate_chunks.py` l'a signalé (écart
+  FR/AR 17 %) ; on a reverté ce seul code via git et retiré son cache OCR.
+- Ré-indexation : `python -m rag.index --lang ar` → **5 818 articles AR**, collection
+  à **11 096 points**.
+- **Artefacts mineurs restants** (cosmétiques, non corrigés car risqués) : `»` à la
+  place de la virgule arabe `،`, `مبد!` (OCR lit `إ` comme `!`). Le fond (mots,
+  négations, numéros) est correct.
+
+### 4.5 Le pipeline complet & les pièges opérationnels
+Séquence pour (re)fabriquer l'arabe propre :
+```bash
+python corpus/scripts/ocr_ar.py            # OCR tous les *_ar.pdf → corpus/ocr/ (lent, caché)
+python corpus/scripts/chunk_codes.py       # re-chunk (AR depuis OCR + garde + complétion)
+python corpus/scripts/validate_chunks.py   # contrôle FR/AR (repérer une sur-segmentation)
+python -m rag.index --lang ar              # ré-indexe uniquement l'arabe (FR inchangé)
+```
+Pièges vérifiés :
+- **Tesseract + cwd à espace** : « Chawerni _Apps » fait échouer la lecture du
+  fichier image → `ocr_ar.py` écrit les PNG dans un `tempfile` (chemin sans espace).
+- **BGE-M3 se bloque sur MPS** pour les longues séquences → indexation forcée en CPU
+  (`CHAWERNI_DEVICE=cpu`).
+- **Qdrant local = un seul process** : le backend et la ré-indexation ne peuvent
+  PAS tourner en même temps (verrou disque). Couper le backend avant de réindexer ;
+  en prod (Qdrant Cloud serveur) cette limite disparaît.
+- `--lang ar` évite de réembarquer le FR (déjà propre) → ~35 min au lieu de ~75.
+
 ---
 
 <a name="5-phase-2--rag"></a>
