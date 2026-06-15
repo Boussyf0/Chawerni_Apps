@@ -13,7 +13,7 @@ index sur **Qdrant Cloud** (free), LLM **Groq** (free). Coût ≈ 0 grâce au pa
 
 | Ressource | Offre pack | Usage |
 |---|---|---|
-| **DigitalOcean** | crédit **200 $ / 1 an** | droplet API (≈ 24 $/mois → ~8 mois) |
+| **DigitalOcean** | crédit **200 $ / 1 an** | droplet API 8 Go (≈ 48 $/mois → ~4 mois) |
 | **Namecheap** ou **.TECH** | domaine gratuit 1 an + SSL | `chawerni.me` / `chawerni.tech` |
 | **Sentry** | plan dev gratuit | suivi d'erreurs (optionnel) |
 | Groq | hors pack, free tier | LLM (clé `GROQ_API_KEY`) |
@@ -23,35 +23,39 @@ index sur **Qdrant Cloud** (free), LLM **Groq** (free). Coût ≈ 0 grâce au pa
 > contenu), l'hébergement hors Maroc est acceptable. À rapatrier au Maroc dès qu'on
 > stocke des données utilisateurs.
 
-## 1. Index → Qdrant Cloud
+## 1. Index → Qdrant Cloud ✅ FAIT (2026-06-15)
 
-1. Crée un cluster gratuit sur cloud.qdrant.io → note l'**URL** et l'**API key**.
-2. Depuis ta machine (l'index est déjà construit en local) :
+Cluster free déjà créé et **index poussé** : collection `chawerni_articles` =
+**11 096 points** (23 fichiers FR+AR), retrieval vérifié OK. Rien à refaire.
 
-```bash
-cd "Chawerni _Apps"
-export QDRANT_URL="https://xxxx.eu-central.aws.cloud.qdrant.io:6333"
-export QDRANT_API_KEY="xxx"
-rag/.venv/bin/python -m rag.index --recreate    # pousse les 10 960 points vers le Cloud
-```
-
-(Le même script qu'en local : `store.py` bascule sur le Cloud dès que `QDRANT_URL` est défini.)
+> Pour re-pousser un jour (ex. corpus mis à jour) : `store.py` bascule sur le Cloud
+> dès que `QDRANT_URL` est défini. Le push ré-embed BGE-M3 en CPU (~plusieurs h) ;
+> upsert durci (timeout 120 s, batch 128, retry) pour éviter les « write timed out ».
+> ```bash
+> QDRANT_URL="https://…:6333" QDRANT_API_KEY="…" CHAWERNI_DEVICE=cpu \
+>   rag/.venv/bin/python -m rag.index --recreate
+> ```
 
 ## 2. Droplet DigitalOcean
 
-1. Crée un droplet **Ubuntu 22.04, 4 Go RAM** (BGE-M3 a besoin de ~4 Go). Ajoute ta clé SSH.
-2. Installe Docker :
+1. Crée un droplet **Ubuntu 24.04, 8 Go RAM / 2 vCPU** (≈ 48 $/mois, gratuit ~4 mois
+   avec le crédit Student). 8 Go est nécessaire : le **build Docker** de l'image ML
+   (torch + BGE-M3 2,3 Go) ET le runtime (BGE-M3 en RAM ~2,5–3 Go) ne tiennent pas
+   sur 4 Go — c'est ce qui faisait planter le builder d'App Platform. Ajoute ta clé SSH.
+2. Installe Docker et build :
 
 ```bash
 ssh root@<IP_DROPLET>
 curl -fsSL https://get.docker.com | sh
 mkdir -p /opt/chawerni && cd /opt/chawerni
-git clone <ton-repo> .            # ou rsync du dossier (sans rag/.venv ni corpus/raw)
-cp .env.example .env && nano .env  # GROQ_API_KEY, QDRANT_URL, QDRANT_API_KEY, DOMAIN
-docker compose up -d --build       # 1er boot : ~quelques min (téléchargement BGE-M3)
+git clone https://github.com/Boussyf0/Chawerni_Apps .   # ou rsync (sans rag/.venv ni corpus/raw)
+cp .env.example .env && nano .env   # GROQ_API_KEY, GROQ_MODEL(_FAST), QDRANT_URL, QDRANT_API_KEY, DOMAIN
+docker compose up -d --build        # build ~5-10 min (DL BGE-M3 baké dans l'image)
 ```
 
-3. Vérifie : `curl -s localhost:8000/health` (via le conteneur api), puis attends le healthcheck vert.
+3. Vérifie : `docker compose exec api curl -s localhost:8000/health`, puis attends le
+   healthcheck vert (`docker compose ps`). Le modèle est **baké dans l'image** → pas
+   de download au boot, juste le chargement en RAM (~1 min).
 
 ## 3. Domaine + TLS
 
@@ -79,9 +83,10 @@ Secrets repo : `DROPLET_HOST`, `DROPLET_USER`, `DROPLET_SSH_KEY`. Variable : `AP
 
 ## 6. Réglages & qualité
 
-- **Modèle LLM** : `GROQ_MODEL` dans `.env`. Aujourd'hui seul `llama-3.1-8b-instant`
-  est servi par ton org Groq (scout 403, maverick 404). Dès qu'un modèle 70B est
-  disponible, change cette seule ligne — citation_rate et refus s'amélioreront.
+- **Modèle LLM** (bi-modèle) : `GROQ_MODEL=llama-3.3-70b-versatile` (réponses, bien
+  meilleur) + `GROQ_MODEL_FAST=llama-3.1-8b-instant` (reformulation darija). ⚠ Le 70B
+  free = **100k tokens/JOUR** ; si tu épuises le quota (429 TPD), rabats temporairement
+  `GROQ_MODEL` sur le 8B ou passe au Dev tier payant.
 - **Seuil de refus** : `rag/config.py` → `DENSE_SCORE_MIN`.
 - **Santé** : `GET /health` ; **logs** : `docker compose logs -f api` (jamais le
   contenu des questions — loi 09-08).

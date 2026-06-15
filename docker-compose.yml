@@ -14,9 +14,10 @@ services:
       QDRANT_URL: ${QDRANT_URL}
       QDRANT_API_KEY: ${QDRANT_API_KEY}
       GROQ_API_KEY: ${GROQ_API_KEY}
-      GROQ_MODEL: ${GROQ_MODEL:-llama-3.1-8b-instant}
-    volumes:
-      - models:/models           # cache du modèle BGE-M3 (persiste entre redémarrages)
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}      # réponses (70B)
+      GROQ_MODEL_FAST: ${GROQ_MODEL_FAST:-llama-3.1-8b-instant} # reformulation darija
+    # ⚠ PAS de volume sur /models : BGE-M3 est BAKÉ dans l'image (HF_HUB_OFFLINE=1).
+    # Un volume vide masquerait le modèle → crash au boot en mode offline.
     expose:
       - "8000"
     healthcheck:
@@ -24,7 +25,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 180s        # 1er démarrage : téléchargement du modèle
+      start_period: 120s        # modèle baké : boot = chargement BGE-M3 en RAM (~1 min)
 
   caddy:
     image: caddy:2-alpine
@@ -42,6 +43,5 @@ services:
       - caddy_config:/config
 
 volumes:
-  models:
   caddy_data:
   caddy_config:
