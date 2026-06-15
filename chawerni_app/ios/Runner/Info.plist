@@ -2,6 +2,19 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- AdMob — App ID de TEST Google. REMPLACER par le vrai App ID AdMob iOS
+	     avant publication. -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Cet identifiant sert à afficher des publicités plus pertinentes pour soutenir l'application.</string>
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
 	<!-- Test local : autorise le HTTP en clair vers localhost (l'API prod est en
 	     HTTPS via Caddy, donc ATS reste actif pour le reste). -->
 	<key>NSAppTransportSecurity</key>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'ads/ad_manager.dart';
 import 'screens/app_shell.dart';
 import 'screens/disclaimer_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -13,12 +14,41 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final state = AppState();
   await state.load();
+  // Pubs : init en arrière-plan (consentement + SDK), ne bloque pas le démarrage.
+  AdManager.instance.init();
   runApp(ChawerniApp(state: state));
 }
 
-class ChawerniApp extends StatelessWidget {
+class ChawerniApp extends StatefulWidget {
   final AppState state;
   const ChawerniApp({super.key, required this.state});
+
+  @override
+  State<ChawerniApp> createState() => _ChawerniAppState();
+}
+
+class _ChawerniAppState extends State<ChawerniApp> with WidgetsBindingObserver {
+  AppState get state => widget.state;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // App-open au retour au premier plan (plafonné par AdManager).
+    if (state == AppLifecycleState.resumed) {
+      AdManager.instance.showAppOpenIfReady();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

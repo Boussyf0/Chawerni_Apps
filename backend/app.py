@@ -82,6 +82,17 @@ def _excerpt(texte: str, n: int = 180) -> str:
     return t[:n] + ("…" if len(t) > n else "")
 
 
+@app.get("/")
+def root() -> dict:
+    """Page racine amicale (la racine n'a pas de logique métier)."""
+    return {
+        "service": "Chawerni API",
+        "status": "ok",
+        "endpoints": ["/health", "/ask", "/codes",
+                      "/codes/{code}/articles", "/sources/{code}/{article}", "/search"],
+    }
+
+
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     try:

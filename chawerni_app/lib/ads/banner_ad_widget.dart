@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+import '../theme/tokens.dart';
+import 'ad_manager.dart';
+import 'ads_config.dart';
+
+/// Bannière AdMob auto-gérée : se charge, s'affiche à sa taille, se libère.
+/// Rien tant qu'elle n'est pas chargée (pas de trou dans l'UI). À placer sur les
+/// écrans « légers » (Bibliothèque, Hoquqi, Réglages) — JAMAIS sur les réponses
+/// juridiques ni les textes de loi.
+class BannerAdWidget extends StatefulWidget {
+  const BannerAdWidget({super.key});
+
+  @override
+  State<BannerAdWidget> createState() => _BannerAdWidgetState();
+}
+
+class _BannerAdWidgetState extends State<BannerAdWidget> {
+  BannerAd? _ad;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (AdManager.instance.ready) _load();
+  }
+
+  void _load() {
+    final ad = BannerAd(
+      adUnitId: AdsConfig.banner,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          if (mounted) setState(() => _loaded = true);
+        },
+        onAdFailedToLoad: (ad, _) => ad.dispose(),
+      ),
+    );
+    _ad = ad;
+    ad.load();
+  }
+
+  @override
+  void dispose() {
+    _ad?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded || _ad == null) return const SizedBox.shrink();
+    return Container(
+      width: double.infinity,
+      height: _ad!.size.height.toDouble(),
+      alignment: Alignment.center,
+      color: C.warqa,
+      child: AdWidget(ad: _ad!),
+    );
+  }
+}

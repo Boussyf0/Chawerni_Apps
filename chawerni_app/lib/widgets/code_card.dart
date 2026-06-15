@@ -35,6 +35,7 @@ class CodeCard extends StatelessWidget {
     final color = C.matiere(accent);
     final titlePrimary = lang == Lang.fr ? titleFr : titleAr;
     final titleSecondary = lang == Lang.fr ? titleAr : titleFr;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return GestureDetector(
       onTap: onTap,
@@ -46,92 +47,120 @@ class CodeCard extends StatelessWidget {
           boxShadow: S.shadowSoft,
         ),
         clipBehavior: Clip.antiAlias,
-        // Barre d'accent via Stack + PositionedDirectional (PAS d'IntrinsicHeight :
-        // celui-ci sous-estime la hauteur quand le dahir passe sur 2 lignes →
-        // débordement). La barre s'étire à la hauteur du contenu.
-        child: Stack(
+        // La barre d'accent est un CustomPaint en foreground : ZÉRO impact sur
+        // le layout. Le Column-min reçoit une hauteur non-contrainte et se
+        // dimensionne librement à son contenu — plus d'overflow.
+        foregroundDecoration: _AccentBarDecoration(color: color, isRtl: isRtl),
+        padding: EdgeInsetsDirectional.fromSTEB(
+            4 + S.s4, S.s4, S.s4, S.s4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            PositionedDirectional(start: 0, top: 0, bottom: 0,
-                child: Container(width: 4, color: color)),
-            Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                      4 + S.s4, S.s4, S.s4, S.s4),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: ChwIcon('book-open', size: 20, color: color),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: ChwIcon('book-open', size: 20, color: color),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  titlePrimary,
-                                  style: Typo.style(
-                                    size: Typo.md,
-                                    weight: Typo.bold,
-                                    color: C.midad,
-                                  ),
-                                ),
-                                Text(
-                                  titleSecondary,
-                                  style: Typo.style(
-                                    size: Typo.xs,
-                                    weight: Typo.medium,
-                                    color: C.midad60,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          VersionBadge(date: date),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
                       Text(
-                        dahir,
+                        titlePrimary,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: Typo.style(
-                          size: Typo.sm,
-                          color: C.midad60,
-                          height: 1.5,
+                          size: Typo.md,
+                          weight: Typo.bold,
+                          color: C.midad,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            consultLabel,
-                            style: Typo.style(
-                              size: Typo.sm,
-                              weight: Typo.citation,
-                              color: color,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          ChwIcon('chevron', size: 16, color: color,
-                              mirrorInRtl: true),
-                        ],
+                      Text(
+                        titleSecondary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Typo.style(
+                          size: Typo.xs,
+                          weight: Typo.medium,
+                          color: C.midad60,
+                        ),
                       ),
                     ],
                   ),
                 ),
-            ],
-          ),
+                const SizedBox(width: 8),
+                VersionBadge(date: date),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              dahir,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Typo.style(
+                size: Typo.sm,
+                color: C.midad60,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  consultLabel,
+                  style: Typo.style(
+                    size: Typo.sm,
+                    weight: Typo.citation,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                ChwIcon('chevron', size: 16, color: color,
+                    mirrorInRtl: true),
+              ],
+            ),
+          ],
         ),
+      ),
     );
+  }
+}
+
+/// Peint une barre d'accent de 4 px sur le côté start (LTR → gauche, RTL → droite).
+/// Utilisé en `foregroundDecoration` : aucun impact sur le layout.
+class _AccentBarDecoration extends Decoration {
+  final Color color;
+  final bool isRtl;
+  const _AccentBarDecoration({required this.color, required this.isRtl});
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) =>
+      _AccentBarPainter(color: color, isRtl: isRtl);
+}
+
+class _AccentBarPainter extends BoxPainter {
+  final Color color;
+  final bool isRtl;
+  _AccentBarPainter({required this.color, required this.isRtl});
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final size = configuration.size ?? Size.zero;
+    final rect = isRtl
+        ? Rect.fromLTWH(offset.dx + size.width - 4, offset.dy, 4, size.height)
+        : Rect.fromLTWH(offset.dx, offset.dy, 4, size.height);
+    canvas.drawRect(rect, Paint()..color = color);
   }
 }

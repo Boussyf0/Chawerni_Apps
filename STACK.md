@@ -445,6 +445,52 @@ puis `python -m rag.index`). Voir `DEPLOY.md` pour le pas-à-pas.
 
 ---
 
+<a name="12-monetisation"></a>
+## 12. Monétisation (AdMob + freemium) — `lib/ads/`
+
+**Objectif** : couvrir le cloud/infra. **Réalité** : une bannière AdMob rapporte
+~0,5–2 $ / 1 000 vues → couvrir ~50 $/mois ≈ **30–50k vues/mois** (quelques milliers
+d'utilisateurs actifs). Les pubs seules ne suffisent pas au début → le vrai levier est
+**ads + un petit abonnement Pro** + réduire l'infra (droplet 24 $, ou alléger la box).
+
+### Règles de marque (non négociables)
+- **Aucune pub sur les réponses juridiques ni les textes de loi** (chat, fiches
+  d'article). La confiance prime ; la rétention rapporte plus que l'impression.
+- **Les textes de loi restent gratuits et illimités** (Bibliothèque) — jamais de
+  paywall sur la loi. Seul le **chat IA** est mesuré (il consomme des tokens Groq).
+- **Plafonds de fréquence** sur interstitiel/app-open — sinon AdMob **bannit** le compte.
+
+### Ce qui est implémenté (`google_mobile_ads`)
+| Élément | Où / quand | Garde-fou |
+|---|---|---|
+| **Bannière** | bas de Bibliothèque / Hoquqi / Réglages | jamais sur le chat ; rien tant que non chargée |
+| **Interstitiel** | toutes les `interstitialEveryNQuestions` (3) questions | + délai mini `interstitialMinGap` (60 s) |
+| **Rewarded** | « regarder une pub → +5 questions » quand le quota est épuisé | volontaire (l'utilisateur choisit) |
+| **App-open** | au retour au premier plan | 1 fois / `appOpenMinGap` (4 min) |
+| **Freemium** | `freeQuestionsPerDay` (5) questions IA/jour | au-delà : rewarded ou Pro (la loi reste gratuite) |
+| **Consentement** | UMP (`ConsentInformation`) au démarrage | requis (les SDK pub collectent des données → loi 09-08 + politique de confidentialité) |
+
+Modules : `ads/ads_config.dart` (IDs), `ad_manager.dart` (init/consent + interstitiel/
+rewarded/app-open + plafonds), `banner_ad_widget.dart`, `quota_service.dart` (quota
+journalier). App-open câblé via un `WidgetsBindingObserver` dans `main.dart`.
+
+### Mise en service (avant publication)
+1. **IDs de TEST Google** câblés par défaut (sûrs en dev — ⚠ ne jamais cliquer ses
+   VRAIES pubs en test = ban). Les vrais IDs se passent en `--dart-define`
+   (`ADMOB_BANNER_ANDROID=…`, etc.) + remplacer l'**App ID** dans `AndroidManifest.xml`
+   et `ios/Runner/Info.plist`.
+2. **Médiation** (Meta Audience Network fort en MENA, AppLovin/Unity) : se configure
+   dans le **tableau de bord AdMob**, pas dans le code → +20–40 % de CPM.
+3. **Politique de confidentialité** obligatoire (Play/App Store) déclarant la collecte
+   publicitaire.
+
+### À venir
+- **Abonnement Pro** (`in_app_purchase` : StoreKit / Play Billing) — sans pub, modèle
+  70B, fiches Hoquqi premium, hors-ligne. `QuotaService.isPro` est déjà le drapeau prévu.
+- **Native ads** (dans la liste Bibliothèque) — possible, plus complexe (templates natifs).
+
+---
+
 <a name="11-limites"></a>
 ## 11. Limites connues & dette technique
 

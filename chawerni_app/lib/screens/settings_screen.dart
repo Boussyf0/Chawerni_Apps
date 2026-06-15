@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../ads/banner_ad_widget.dart';
 import '../data/strings.dart';
 import '../state/app_scope.dart';
 import '../theme/tokens.dart';
@@ -95,6 +96,7 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           ),
+          const BannerAdWidget(),
         ],
       ),
     );

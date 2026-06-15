@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../ads/banner_ad_widget.dart';
 import '../data/lang.dart';
 import '../state/app_scope.dart';
 import '../theme/tokens.dart';
@@ -127,6 +128,7 @@ class HoquqiScreen extends StatelessWidget {
               },
             ),
           ),
+          const BannerAdWidget(),
         ],
       ),
     );

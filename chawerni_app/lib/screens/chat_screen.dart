@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../ads/ad_manager.dart';
+import '../ads/ads_config.dart';
+import '../ads/quota_service.dart';
 import '../config/app_config.dart';
 import '../data/api_service.dart';
 import '../data/lang.dart';
@@ -10,6 +13,7 @@ import '../theme/tokens.dart';
 import '../theme/typography.dart';
 import '../widgets/alert_banner.dart';
 import '../widgets/chat_bubble.dart';
+import '../widgets/chw_button.dart';
 import '../widgets/chw_chip.dart';
 import '../widgets/chw_icon.dart';
 import '../widgets/lang_switcher.dart';
@@ -102,11 +106,92 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollToEnd();
   }
 
+  // Freemium : la question IA passe par le quota (les textes de loi, eux, restent
+  // gratuits et illimités côté Bibliothèque).
+  Future<void> _askApiGated(String q, Lang lang) async {
+    if (await QuotaService.instance.canAsk()) {
+      _proceedAsk(q, lang);
+    } else if (mounted) {
+      _showQuotaSheet(q, lang);
+    }
+  }
+
+  void _proceedAsk(String q, Lang lang) {
+    QuotaService.instance.recordAsk();
+    _askApi(q, lang);
+    AdManager.instance.onChatQuestion(); // interstitiel (plafonné)
+  }
+
+  void _showQuotaSheet(String q, Lang lang) {
+    final isFr = lang == Lang.fr;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: C.surfaceCard,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(S.radiusSheet))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                    color: C.midad10, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            Text(isFr ? 'Questions gratuites épuisées' : 'انتهت أسئلتك المجانية',
+                style: Typo.style(size: Typo.lg, weight: Typo.bold, color: C.midad)),
+            const SizedBox(height: 6),
+            Text(
+              isFr
+                  ? 'Tu as utilisé tes ${AdsConfig.freeQuestionsPerDay} questions du jour. Regarde une courte pub pour en débloquer 5 — ou consulte gratuitement les textes de loi dans la Bibliothèque.'
+                  : 'استعملت ${AdsConfig.freeQuestionsPerDay} أسئلة اليوم. شاهد إعلانًا قصيرًا لفتح 5 أسئلة إضافية — أو تصفّح النصوص القانونية مجانًا في المكتبة.',
+              style: Typo.style(size: Typo.sm, color: C.midad60, height: 1.5),
+            ),
+            const SizedBox(height: 18),
+            ChwButton(
+              label: isFr ? 'Regarder une pub (+5)' : 'شاهد إعلانًا (+5)',
+              large: true,
+              fullWidth: true,
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                AdManager.instance.showRewarded(() async {
+                  await QuotaService.instance.grantBonus(5);
+                  if (mounted) _proceedAsk(q, lang);
+                }).then((ok) {
+                  if (!ok && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(isFr
+                          ? 'Pub indisponible, réessaie dans un instant.'
+                          : 'الإعلان غير متاح، أعد المحاولة بعد قليل.'),
+                    ));
+                  }
+                });
+              },
+            ),
+            const SizedBox(height: 6),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(isFr ? 'Plus tard' : 'لاحقًا',
+                    style: Typo.style(size: Typo.sm, color: C.midad60)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _send(String text, Lang lang) {
     final q = text.trim();
     if (q.isEmpty) return;
     if (AppConfig.hasApi) {
-      _askApi(q, lang);
+      _askApiGated(q, lang);
     } else {
       // Démo : aiguillage par mot-clé vers un scénario.
       Scenario pick = kScenarios.first;
@@ -122,7 +207,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _onChip(Scenario sc, Lang lang) {
     if (AppConfig.hasApi) {
-      _askApi(sc.chip(lang), lang);
+      _askApiGated(sc.chip(lang), lang);
     } else {
       _askScenario(sc, lang);
     }

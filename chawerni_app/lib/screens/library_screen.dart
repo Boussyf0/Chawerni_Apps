@@ -9,6 +9,7 @@ import '../data/scenarios.dart';
 import '../data/strings.dart';
 import '../state/app_scope.dart';
 import '../theme/tokens.dart';
+import '../ads/banner_ad_widget.dart';
 import '../theme/typography.dart';
 import '../widgets/accent_card.dart';
 import '../widgets/article_sheet.dart';
@@ -153,6 +154,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             ),
           ),
           Expanded(child: _body(app.lang, t)),
+          const BannerAdWidget(),
         ],
       ),
     );

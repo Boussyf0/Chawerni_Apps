@@ -4,9 +4,9 @@ import '../theme/tokens.dart';
 
 /// Carte blanche à barre d'accent latérale (couleur de matière).
 ///
-/// La barre est posée en `PositionedDirectional` (pas d'`IntrinsicHeight`, qui
-/// sous-estime la hauteur d'un texte qui passe sur 2 lignes → débordement). La
-/// barre s'étire naturellement à la hauteur du contenu. RTL-aware.
+/// La barre est peinte via `foregroundDecoration` (custom paint) : ZÉRO impact
+/// sur le layout. Le contenu se dimensionne librement — plus d'overflow quand
+/// un texte passe sur 2 lignes. RTL-aware.
 class AccentCard extends StatelessWidget {
   final Color accent;
   final Widget child;
@@ -15,6 +15,7 @@ class AccentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -25,22 +26,37 @@ class AccentCard extends StatelessWidget {
           boxShadow: S.shadowSoft,
         ),
         clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            PositionedDirectional(
-              start: 0,
-              top: 0,
-              bottom: 0,
-              child: Container(width: 4, color: accent),
-            ),
-            Padding(
-              // start = 4 (barre) + 14
-              padding: const EdgeInsetsDirectional.fromSTEB(18, 14, 14, 14),
-              child: child,
-            ),
-          ],
-        ),
+        foregroundDecoration: _AccentBarDeco(color: accent, isRtl: isRtl),
+        // start = 4 (barre peinte) + 14
+        padding: const EdgeInsetsDirectional.fromSTEB(18, 14, 14, 14),
+        child: child,
       ),
     );
+  }
+}
+
+/// Peint une barre d'accent de 4 px sur le côté start.
+class _AccentBarDeco extends Decoration {
+  final Color color;
+  final bool isRtl;
+  const _AccentBarDeco({required this.color, required this.isRtl});
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) =>
+      _AccentBarPainter(color: color, isRtl: isRtl);
+}
+
+class _AccentBarPainter extends BoxPainter {
+  final Color color;
+  final bool isRtl;
+  _AccentBarPainter({required this.color, required this.isRtl});
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final size = configuration.size ?? Size.zero;
+    final rect = isRtl
+        ? Rect.fromLTWH(offset.dx + size.width - 4, offset.dy, 4, size.height)
+        : Rect.fromLTWH(offset.dx, offset.dy, 4, size.height);
+    canvas.drawRect(rect, Paint()..color = color);
   }
 }

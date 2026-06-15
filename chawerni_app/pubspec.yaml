@@ -43,6 +43,8 @@ dependencies:
   flutter_svg: ^2.0.10+1
   # Appels HTTP vers l'API Chawerni (/ask, /sources).
   http: ^1.2.2
+  # Monétisation : publicités AdMob (bannière, interstitiel, rewarded, app-open).
+  google_mobile_ads: ^5.1.0
 
 dev_dependencies:
   flutter_test:
