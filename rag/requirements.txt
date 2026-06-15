@@ -2,10 +2,18 @@
 # Recommandé : venv avec accès aux paquets système (torch/fitz déjà installés) :
 #   python3 -m venv rag/.venv --system-site-packages
 #   source rag/.venv/bin/activate && pip install -r rag/requirements.txt
+#
+# ⚠ Versions ÉPINGLÉES = celles vérifiées en local (éval passée, backend OK).
+# Sans pin, le build Docker tirait transformers 5.x / huggingface_hub 1.x, qui
+# cassent FlagEmbedding 1.4 au runtime. Ne pas dépingler à la légère.
 
-FlagEmbedding>=1.3.0   # BGE-M3 : dense + sparse en une passe
-qdrant-client>=1.12    # base vectorielle (mode local disque ou serveur)
-openai>=1.40           # client SDK compatible pour l'API Groq
+FlagEmbedding==1.4.0          # BGE-M3 : dense + sparse en une passe
+transformers==4.56.1          # ⚠ FlagEmbedding 1.4 incompatible avec transformers 5.x
+huggingface_hub==0.35.0       # ⚠ rester en <1.0 (compat transformers 4.x)
+tokenizers==0.22.0
+sentence-transformers==3.1.1
+accelerate==1.14.0
+qdrant-client==1.16.0         # base vectorielle (mode local disque ou serveur)
+openai==2.41.1                # client SDK compatible pour l'API Groq
 
-# torch / transformers sont tirés par FlagEmbedding ; si déjà présents au niveau
-# système (venv --system-site-packages), pip ne les réinstalle pas.
+# torch est installé séparément en CPU-only dans le Dockerfile (torch==2.9.1).

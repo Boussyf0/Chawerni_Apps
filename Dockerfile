@@ -8,8 +8,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# torch CPU-only (bien plus léger que la build CUDA par défaut).
-RUN pip install --index-url https://download.pytorch.org/whl/cpu torch
+# torch CPU-only (bien plus léger que la build CUDA par défaut), version épinglée.
+RUN pip install --index-url https://download.pytorch.org/whl/cpu torch==2.9.1
 
 # Dépendances applicatives.
 COPY rag/requirements.txt rag/requirements.txt
