@@ -20,7 +20,11 @@ def get_client() -> QdrantClient:
     if _client is None:
         if config.QDRANT_URL:
             # Serveur / Qdrant Cloud (api_key requis pour le Cloud).
-            _client = QdrantClient(url=config.QDRANT_URL, api_key=config.QDRANT_API_KEY)
+            # timeout généreux : un upsert (dense + sparse) peut dépasser le
+            # défaut court du client et lever « write operation timed out ».
+            _client = QdrantClient(
+                url=config.QDRANT_URL, api_key=config.QDRANT_API_KEY, timeout=120
+            )
         else:
             config.QDRANT_PATH.mkdir(parents=True, exist_ok=True)
             _client = QdrantClient(path=str(config.QDRANT_PATH))

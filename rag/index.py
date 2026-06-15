@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import uuid
 from pathlib import Path
 
@@ -27,7 +28,8 @@ from . import config, embedding
 from .store import ensure_collection, get_client
 
 _NS = uuid.UUID("c4a3e0d2-7b1f-4e6a-9c2d-000000000001")  # namespace stable Chawerni
-UPSERT_BATCH = 256
+UPSERT_BATCH = 128   # plus petit = requêtes plus légères vers Qdrant Cloud
+UPSERT_RETRIES = 4   # le réseau vers le Cloud peut hoqueter ; on retente
 
 
 def point_id(code: str, article_num: str, langue: str, version: str) -> str:
@@ -91,10 +93,18 @@ def index_file(client, path: Path) -> int:
         )
 
     for start in range(0, len(points), UPSERT_BATCH):
-        client.upsert(
-            collection_name=config.COLLECTION,
-            points=points[start : start + UPSERT_BATCH],
-        )
+        batch = points[start : start + UPSERT_BATCH]
+        for attempt in range(1, UPSERT_RETRIES + 1):
+            try:
+                client.upsert(collection_name=config.COLLECTION, points=batch)
+                break
+            except Exception as exc:  # noqa: BLE001 — réseau Cloud, on retente
+                if attempt == UPSERT_RETRIES:
+                    raise
+                wait = 2 ** attempt
+                print(f"    ⚠ upsert échoué ({exc.__class__.__name__}), "
+                      f"retry {attempt}/{UPSERT_RETRIES - 1} dans {wait}s")
+                time.sleep(wait)
     return len(points)
 
 
