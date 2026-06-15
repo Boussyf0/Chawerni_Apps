@@ -18,6 +18,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 
 from rag import config, embedding, pipeline
 from rag.retrieve import detect_langue, retrieve
@@ -80,6 +81,14 @@ def _clean(texte: str) -> str:
 def _excerpt(texte: str, n: int = 180) -> str:
     t = _clean(texte)
     return t[:n] + ("…" if len(t) > n else "")
+
+
+@app.get("/app-ads.txt", response_class=PlainTextResponse)
+def app_ads_txt() -> str:
+    """Fichier app-ads.txt AdMob (anti-fraude). Doit être servi à la racine du
+    domaine « site développeur » déclaré sur le store. Sert ici via l'API au cas
+    où ce domaine pointe vers le backend."""
+    return "google.com, pub-8986402840311549, DIRECT, f08c47fec0942fa0\n"
 
 
 @app.get("/")
