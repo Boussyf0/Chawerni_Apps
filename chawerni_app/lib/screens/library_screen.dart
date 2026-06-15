@@ -10,6 +10,7 @@ import '../data/strings.dart';
 import '../state/app_scope.dart';
 import '../theme/tokens.dart';
 import '../theme/typography.dart';
+import '../widgets/accent_card.dart';
 import '../widgets/article_sheet.dart';
 import '../widgets/chw_icon.dart';
 import '../widgets/code_card.dart';
@@ -262,62 +263,40 @@ class _ResultRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = C.matiere(kCodeAccent(source.code));
-    return GestureDetector(
+    return AccentCard(
+      accent: color,
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: C.surfaceCard,
-          borderRadius: BorderRadius.circular(S.radiusCard),
-          border: Border.all(color: C.borderCard),
-          boxShadow: S.shadowSoft,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Container(width: 4, color: color),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: C.zaafranLight,
-                              borderRadius: BorderRadius.circular(S.radiusPill),
-                            ),
-                            child: Text('${source.marqueur} ${source.articleNum}',
-                                style: Typo.article(
-                                    size: Typo.sm, weight: Typo.citation, color: C.midad)),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(codeLabel(source.code, lang),
-                                overflow: TextOverflow.ellipsis,
-                                style: Typo.style(
-                                    size: Typo.sm, weight: Typo.medium, color: C.midad60)),
-                          ),
-                          ChwIcon('chevron', size: 16, color: color, mirrorInRtl: true),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(source.excerpt,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Typo.style(size: Typo.sm, color: C.midad, height: 1.5)),
-                    ],
-                  ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: C.zaafranLight,
+                  borderRadius: BorderRadius.circular(S.radiusPill),
                 ),
+                child: Text('${source.marqueur} ${source.articleNum}',
+                    style: Typo.article(
+                        size: Typo.sm, weight: Typo.citation, color: C.midad)),
               ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(codeLabel(source.code, lang),
+                    overflow: TextOverflow.ellipsis,
+                    style: Typo.style(
+                        size: Typo.sm, weight: Typo.medium, color: C.midad60)),
+              ),
+              ChwIcon('chevron', size: 16, color: color, mirrorInRtl: true),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(source.excerpt,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Typo.style(size: Typo.sm, color: C.midad, height: 1.5)),
+        ],
       ),
     );
   }

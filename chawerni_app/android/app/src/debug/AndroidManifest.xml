@@ -4,4 +4,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- DEBUG uniquement : autorise le HTTP en clair pour tester l'API locale
+         sur un vrai appareil (ex. http://192.168.x.x:8000). Les builds release
+         ne mergent pas ce fichier → TLS toujours exigé en prod. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>

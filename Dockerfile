@@ -16,11 +16,19 @@ COPY rag/requirements.txt rag/requirements.txt
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install -r backend/requirements.txt
 
+# Pré-téléchargement de BGE-M3 DANS l'image (~2,3 Go) → démarrage rapide et
+# fiable, indispensable sans disque persistant (App Platform) : pas de download
+# au boot, donc pas de timeout du health check.
+RUN python -c "from huggingface_hub import snapshot_download; snapshot_download('BAAI/bge-m3')"
+
+# À partir d'ici, on lit le modèle depuis le cache local (aucun appel réseau HF).
+ENV HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1
+
 # Code.
 COPY rag/ rag/
 COPY backend/ backend/
 
-# Le modèle BGE-M3 (~2,3 Go) se télécharge au 1er démarrage dans le volume /models.
 # Index vectoriel : externe (Qdrant Cloud via QDRANT_URL / QDRANT_API_KEY).
 EXPOSE 8000
 CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]

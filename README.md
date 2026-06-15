@@ -4,6 +4,11 @@ Assistant juridique IA pour le droit marocain — chatbot RAG qui répond en
 citant les articles de loi exacts (FR / AR / darija), basé exclusivement sur
 les textes officiels consolidés (Adala, SGG).
 
+> 📖 **[STACK.md](STACK.md)** — explication **en profondeur** de chaque techno
+> utilisée et **pourquoi** (corpus, OCR arabe, BGE-M3, Qdrant, Groq, FastAPI,
+> Flutter, déploiement…), avec les alternatives écartées et les pièges. Voir
+> aussi `docs/architecture.md` (diagrammes) et `docs/design.md` (design system).
+
 ## Principes non négociables
 
 1. **RAG, pas fine-tuning** : chaque réponse cite l'article source vérifiable.

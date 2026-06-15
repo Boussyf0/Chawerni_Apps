@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/tokens.dart';
 import '../theme/typography.dart';
+import 'accent_card.dart';
 import 'version_badge.dart';
 
 /// SourceCard ⭐ — LE composant signature. Carte de citation :
@@ -66,24 +67,9 @@ class _SourceCardState extends State<SourceCard>
         scale: _pressed ? 0.98 : 1.0,
         duration: S.durationFast,
         curve: S.easeOut,
-        child: Container(
-          decoration: BoxDecoration(
-            color: C.surfaceCard,
-            borderRadius: BorderRadius.circular(S.radiusCard),
-            border: Border.all(color: C.borderCard),
-            boxShadow: S.shadowSoft,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Barre latérale accent citation (zaafran) — côté début.
-                Container(width: 4, color: C.zaafran),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-                    child: Column(
+        child: AccentCard(
+          accent: C.zaafran,
+          child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -149,12 +135,7 @@ class _SourceCardState extends State<SourceCard>
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

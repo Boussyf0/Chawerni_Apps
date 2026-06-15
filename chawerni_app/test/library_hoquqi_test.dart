@@ -35,11 +35,20 @@ void main() {
     expect(find.text('Divorce'), findsOneWidget);
   });
 
-  testWidgets('Bibliothèque (hors-ligne) liste les codes', (tester) async {
+  testWidgets('Bibliothèque (hors-ligne) liste les codes sans débordement',
+      (tester) async {
+    // Téléphone étroit : le dahir passe sur 2 lignes → ancien IntrinsicHeight
+    // débordait. Régression verrouillée ici.
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(_wrap(AppState(), const LibraryScreen()));
     await tester.pump();
     expect(find.text('Code pénal'), findsOneWidget);
     expect(find.text('Code du travail'), findsOneWidget);
+    expect(tester.takeException(), isNull); // aucun RenderFlex overflow
   });
 
   test('Hoquqi → Chat : askInChat dépose la question et bascule sur l\'onglet 0', () {

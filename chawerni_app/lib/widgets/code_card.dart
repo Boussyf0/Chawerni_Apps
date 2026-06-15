@@ -46,15 +46,18 @@ class CodeCard extends StatelessWidget {
           boxShadow: S.shadowSoft,
         ),
         clipBehavior: Clip.antiAlias,
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(width: 4, color: color),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(S.s4),
+        // Barre d'accent via Stack + PositionedDirectional (PAS d'IntrinsicHeight :
+        // celui-ci sous-estime la hauteur quand le dahir passe sur 2 lignes →
+        // débordement). La barre s'étire à la hauteur du contenu.
+        child: Stack(
+          children: [
+            PositionedDirectional(start: 0, top: 0, bottom: 0,
+                child: Container(width: 4, color: color)),
+            Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      4 + S.s4, S.s4, S.s4, S.s4),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
@@ -126,11 +129,9 @@ class CodeCard extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
             ],
           ),
         ),
-      ),
     );
   }
 }

@@ -101,12 +101,19 @@ def index_file(client, path: Path) -> int:
 def main() -> None:
     args = [a for a in sys.argv[1:] if a]
     recreate = "--recreate" in args
+    lang = None
+    if "--lang" in args:
+        i = args.index("--lang")
+        lang = args[i + 1]
+        args = args[:i] + args[i + 2:]
     code = next((a for a in args if not a.startswith("--")), None)
 
     client = get_client()
     ensure_collection(client, recreate=recreate)
 
     files = _chunk_files(code)
+    if lang:  # ré-indexer une seule langue (ex. après OCR de l'arabe)
+        files = [f for f in files if f.stem.endswith(f"_{lang}")]
     total = 0
     for path in files:
         n = index_file(client, path)

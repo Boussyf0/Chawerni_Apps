@@ -92,9 +92,15 @@ class ArticleChunk:
 # --- extraction -------------------------------------------------------------
 
 def extract_text(pdf_path: Path, lang: str) -> str:
-    doc = fitz.open(pdf_path)
-    pages: list[str] = [str(doc[i].get_text()) for i in range(doc.page_count)]
-    doc.close()
+    # Cache OCR (corpus/ocr/{stem}.txt) prioritaire pour l'arabe : la couche
+    # texte des PDFs AR est corrompue → on OCRise les pages rendues (ocr_ar.py).
+    ocr_cache = ROOT / "ocr" / f"{pdf_path.stem}.txt"
+    if lang == "ar" and ocr_cache.exists():
+        pages: list[str] = ocr_cache.read_text(encoding="utf-8").split("\f")
+    else:
+        doc = fitz.open(pdf_path)
+        pages = [str(doc[i].get_text()) for i in range(doc.page_count)]
+        doc.close()
 
     # Titres courants : lignes identiques répétées sur >25 % des pages, mais
     # UNIQUEMENT près des bords de page (EDGE premières/dernières lignes).
@@ -324,6 +330,7 @@ def chunk_file(code: str, lang: str, entry: dict) -> list[ArticleChunk]:
     pdf = RAW / f"{code}_{lang}.pdf"
     if not pdf.exists():
         return []
+    using_ocr = lang == "ar" and (ROOT / "ocr" / f"{code}_{lang}.txt").exists()
     text = extract_text(pdf, lang)
     headers, marker = select_headers(text, lang)
 
@@ -332,7 +339,9 @@ def chunk_file(code: str, lang: str, entry: dict) -> list[ArticleChunk]:
     # est trompeur quand la chaîne est elle-même tronquée (le max l'est
     # aussi), donc seuil haut : seuls les fichiers à couverture quasi-parfaite
     # évitent la double extraction.
-    if lang == "ar" and headers:
+    # ⚠ Sauf si on a un OCR propre : on lui fait confiance (texte lisible) et on
+    # complète les articles que l'OCR a ratés depuis les chunks existants.
+    if lang == "ar" and headers and not using_ocr:
         coverage = len(headers) / max(h["num"] for h in headers)
         if coverage < 0.95:
             alt_text = extract_text_visual_reversed(pdf)
@@ -359,6 +368,43 @@ def chunk_file(code: str, lang: str, entry: dict) -> list[ArticleChunk]:
             sha256_source=reg.get("sha256", ""),
             source_pdf=pdf.name,
         ))
+
+    # OCR : garde-fou + complétion depuis les chunks existants (couche texte).
+    #  - corps OCR anormalement court (vs l'ancien) = OCR raté → on garde l'ancien
+    #    texte (ex. art. 19 « المادة 19©0 ») ; mieux vaut un texte fidèle même
+    #    bruité qu'un article juridique illisible.
+    #  - article absent de l'OCR → complété depuis l'ancien (aucune perte).
+    if using_ocr:
+        existing = OUT / f"{code}_{lang}.jsonl"
+        if existing.exists():
+            old_by_num = {}
+            for line in existing.read_text(encoding="utf-8").splitlines():
+                if line.strip():
+                    o = json.loads(line)
+                    old_by_num[o["num_int"]] = o
+            guarded = 0
+            for c in chunks:
+                o = old_by_num.get(c.num_int)
+                if o and len(c.texte) < max(25, int(0.5 * len(o["texte"]))):
+                    c.texte = o["texte"]  # OCR douteux → texte d'origine
+                    guarded += 1
+            have = {c.num_int for c in chunks}
+            kept = 0
+            for num, o in old_by_num.items():
+                if num not in have:
+                    chunks.append(ArticleChunk(
+                        code=o["code"], langue=o["langue"],
+                        article_num=o["article_num"], num_int=o["num_int"],
+                        marqueur=o.get("marqueur", marker),
+                        hierarchie=o.get("hierarchie", {}),
+                        texte=o["texte"], version=o.get("version", ""),
+                        sha256_source=o.get("sha256_source", ""),
+                        source_pdf=o.get("source_pdf", pdf.name),
+                    ))
+                    kept += 1
+            print(f"  ({code} [{lang}] OCR : {len(chunks) - kept - guarded} articles "
+                  f"OCR propres, {guarded} repliés (OCR douteux), {kept} complétés)")
+            chunks.sort(key=lambda c: c.num_int)
     return chunks
 
 
