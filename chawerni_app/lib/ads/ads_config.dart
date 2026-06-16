@@ -31,23 +31,31 @@ class AdsConfig {
 
   static bool get _android => Platform.isAndroid;
 
-  // En debug : toujours test. En release : vrais IDs Android (iOS → test tant
-  // qu'aucune app AdMob iOS n'existe).
-  static String get banner => kDebugMode
+  /// ⚠ Tant que le compte AdMob est « Examen requis » (non approuvé) et que l'app
+  /// n'est pas sur le Play Store, les VRAIS blocs renvoient NO_FILL (erreur 3) :
+  /// aucune pub ne s'affiche. On force donc les blocs de TEST officiels Google
+  /// (qui se remplissent toujours) pour pouvoir tester/démontrer l'app.
+  /// → Repasser à `false` une fois le compte approuvé + l'app publiée, pour
+  ///   activer les vraies pubs (et donc les revenus).
+  static const bool forceTestAds = true;
+
+  /// Sert-on des pubs de test ? (debug OU override compte non approuvé)
+  static bool get usingTestIds => kDebugMode || forceTestAds;
+
+  // usingTestIds → blocs de TEST ; sinon → vrais blocs Android (iOS reste en test
+  // tant qu'aucune app AdMob iOS n'existe).
+  static String get banner => usingTestIds
       ? (_android ? _testBannerA : _testBannerI)
       : (_android ? _prodBannerA : _testBannerI);
-  static String get interstitial => kDebugMode
+  static String get interstitial => usingTestIds
       ? (_android ? _testInterA : _testInterI)
       : (_android ? _prodInterA : _testInterI);
-  static String get rewarded => kDebugMode
+  static String get rewarded => usingTestIds
       ? (_android ? _testRewardA : _testRewardI)
       : (_android ? _prodRewardA : _testRewardI);
-  static String get appOpen => kDebugMode
+  static String get appOpen => usingTestIds
       ? (_android ? _testOpenA : _testOpenI)
       : (_android ? _prodOpenA : _testOpenI);
-
-  /// Vrai si on sert des pubs de test (debug).
-  static bool get usingTestIds => kDebugMode;
 
   /// Appareils de DEV : reçoivent toujours des pubs de TEST (même en release),
   /// donc cliquables sans risquer un ban du compte AdMob. Récupérer l'ID dans

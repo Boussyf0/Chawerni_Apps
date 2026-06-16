@@ -29,7 +29,12 @@ class AdManager {
 
   /// À appeler une fois au démarrage (après runApp).
   Future<void> init() async {
-    await _requestConsent();
+    // Le consentement (UMP/RGPD) ne concerne que les vraies pubs. En pubs de test
+    // (compte non approuvé), on le saute : la régie sert les pubs de test sans, et
+    // ça évite l'erreur « no form configured » tant qu'aucun formulaire AdMob n'existe.
+    if (!AdsConfig.usingTestIds) {
+      await _requestConsent();
+    }
     // Appareils de dev → pubs de TEST même en release (cliquables sans ban).
     await MobileAds.instance.updateRequestConfiguration(
       RequestConfiguration(testDeviceIds: AdsConfig.testDeviceIds),
