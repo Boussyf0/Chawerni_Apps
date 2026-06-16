@@ -13,6 +13,7 @@ import '../theme/tokens.dart';
 import '../theme/typography.dart';
 import '../widgets/alert_banner.dart';
 import '../widgets/chat_bubble.dart';
+import 'find_lawyer_screen.dart';
 import '../widgets/chw_button.dart';
 import '../widgets/chw_chip.dart';
 import '../widgets/chw_icon.dart';
@@ -357,6 +358,9 @@ class _ChatScreenState extends State<ChatScreen> {
             title: 'هاد الموضوع مهم بزاف',
             body: a.lawyerBanner!,
             actionLabel: t.findLawyer,
+            onAction: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const FindLawyerScreen()),
+            ),
           ),
         ),
       ],

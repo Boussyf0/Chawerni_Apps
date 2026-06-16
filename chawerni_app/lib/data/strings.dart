@@ -134,4 +134,76 @@ class T {
     'معلومة قانونية، وليست استشارة.',
     'معلومة قانونية، ماشي استشارة.',
   );
+
+  // --- Trouver un avocat (annuaire à venir + recrutement) ------------------
+  String get lawyerTitle => _pick('Trouver un avocat', 'ابحث عن محامٍ', 'لقا محامي');
+  String get lawyerSoonTitle => _pick(
+    'Annuaire d\'avocats — bientôt',
+    'دليل المحامين — قريباً',
+    'دليل المحامين — قريب',
+  );
+  String get lawyerForUsers => _pick(
+    'Nous construisons un annuaire d\'avocats partenaires pour t\'orienter par ville et spécialité. En attendant, pour un dossier sérieux, rapproche-toi d\'un avocat ou du barreau de ta ville.',
+    'نعمل على إنشاء دليل لمحامين شركاء لتوجيهك حسب المدينة والتخصّص. في الانتظار، ولملفّ جدّي، توجّه إلى محامٍ أو إلى هيئة المحامين بمدينتك.',
+    'كنبنيو دليل ديال محامين شركاء باش نوجّهوك حسب المدينة والتخصص. تما، وفقضية مهمة، تواصل مع محامي ولا هيئة المحامين فمدينتك.',
+  );
+  String get lawyerJoinTitle => _pick(
+    'Tu es avocat(e) ? Participe au projet',
+    'هل أنت محامٍ؟ شارك في المشروع',
+    'نتا محامي؟ شارك فالمشروع',
+  );
+  String get lawyerJoinBody => _pick(
+    'Rejoins l\'annuaire pour recevoir des utilisateurs déjà informés de leur situation, selon ta spécialité et ta ville. Contacte-moi pour intégrer ta fiche (nom, spécialités, ville, contact).',
+    'انضمّ إلى الدليل لتصلك طلبات من مستخدمين مطّلعين مسبقاً على وضعيتهم، حسب تخصّصك ومدينتك. تواصل معي لإدراج بطاقتك (الاسم، التخصّصات، المدينة، وسيلة التواصل).',
+    'انضمّ للدليل باش توصلك طلبات من ناس عارفين وضعيتهم، حسب تخصصك ومدينتك. تواصل معايا باش نزيد البطاقة ديالك (السمية، التخصصات، المدينة، التواصل).',
+  );
+  String get lawyerContactEmail =>
+      _pick('Me contacter par e-mail', 'تواصل معي عبر البريد', 'تواصل معايا بالإيميل');
+  String get lawyerContactLinkedin =>
+      _pick('Me contacter sur LinkedIn', 'تواصل معي على LinkedIn', 'تواصل معايا فLinkedIn');
+
+  // --- À propos ------------------------------------------------------------
+  String get aboutTitle => _pick('À propos', 'حول التطبيق', 'على التطبيق');
+  String get aboutWhat => _pick(
+    'Chawerni est un assistant d\'information juridique sur le droit marocain. Pose ta question en français, arabe ou darija : la réponse cite toujours les articles de loi exacts.',
+    '«شاورني» مساعد للمعلومة القانونية حول القانون المغربي. اطرح سؤالك بالعربية أو الفرنسية أو الدارجة، والجواب يستند دائماً إلى فصول القانون الدقيقة.',
+    '«شاورني» مساعد فالمعلومة القانونية ديال القانون المغربي. سوّل بالعربية ولا الفرنسية ولا الدارجة، والجواب ديما كيستند لفصول القانون.',
+  );
+  String get aboutDevBy => _pick('Développé par', 'تطوير', 'طوّرو');
+  String get aboutContact => _pick('Contact', 'تواصل', 'تواصل');
+  String get aboutLinkedin => _pick('Profil LinkedIn', 'حساب LinkedIn', 'حساب LinkedIn');
+  String get aboutEmail => _pick('Envoyer un e-mail', 'إرسال بريد', 'صيفط إيميل');
+
+  // --- Confidentialité -----------------------------------------------------
+  String get privacyTitle => _pick('Confidentialité', 'الخصوصية', 'الخصوصية');
+  String get privacyFull =>
+      _pick('Lire la version complète', 'اقرأ النسخة الكاملة', 'قرا النسخة الكاملة');
+  List<String> get privacyPoints {
+    switch (lang) {
+      case Lang.fr:
+        return const [
+          'Aucun compte, aucun nom, e-mail ou numéro demandé.',
+          'Le contenu de tes questions n\'est pas stocké lié à ton identité.',
+          'Tes préférences (langue, quota) restent sur ton téléphone.',
+          'Publicités via Google AdMob (identifiant publicitaire).',
+          'Aucune donnée vendue. Échanges chiffrés (HTTPS).',
+        ];
+      case Lang.ar:
+        return const [
+          'بلا حساب، بلا اسم أو بريد أو رقم.',
+          'لا نخزّن محتوى أسئلتك مرتبطاً بهويتك.',
+          'تفضيلاتك (اللغة، الحصة) تبقى على هاتفك.',
+          'إعلانات عبر Google AdMob (المعرّف الإعلاني).',
+          'لا نبيع أي بيانات. الاتصالات مشفّرة (HTTPS).',
+        ];
+      case Lang.da:
+        return const [
+          'بلا حساب، بلا سمية ولا إيميل ولا نمرة.',
+          'ما كنخزنوش محتوى الأسئلة ديالك مربوط بهويتك.',
+          'التفضيلات ديالك (اللغة، الحصة) كيبقاو فالتيليفون.',
+          'الإعلانات عبر Google AdMob (المعرّف الإعلاني).',
+          'ما كنبيعو حتى داطا. الاتصال مشفّر (HTTPS).',
+        ];
+    }
+  }
 }

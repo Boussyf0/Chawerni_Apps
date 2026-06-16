@@ -7,6 +7,9 @@ import '../theme/tokens.dart';
 import '../theme/typography.dart';
 import '../widgets/chw_icon.dart';
 import '../widgets/lang_switcher.dart';
+import 'about_screen.dart';
+import 'find_lawyer_screen.dart';
+import 'privacy_screen.dart';
 
 /// Réglages — langue, taille de texte (3 crans), à propos, confidentialité.
 class SettingsScreen extends StatelessWidget {
@@ -46,13 +49,28 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 _Row(
+                  label: t.lawyerTitle,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const FindLawyerScreen()),
+                  ),
+                  trailing: const ChwIcon('chevron', size: 18,
+                      color: C.midad30, mirrorInRtl: true),
+                ),
+                const SizedBox(height: 10),
+                _Row(
                   label: t.settingAbout,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
+                  ),
                   trailing: const ChwIcon('chevron', size: 18,
                       color: C.midad30, mirrorInRtl: true),
                 ),
                 const SizedBox(height: 10),
                 _Row(
                   label: t.settingPrivacy,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const PrivacyScreen()),
+                  ),
                   trailing: const ChwIcon('chevron', size: 18,
                       color: C.midad30, mirrorInRtl: true),
                 ),
