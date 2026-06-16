@@ -56,32 +56,43 @@ class Answer:
 
 
 def retrieve_smart(question: str, langue: str | None = None, code: str | None = None,
-                   reformulate: bool = True) -> tuple[list[RetrievedChunk], str]:
-    """Retrieval avec reformulation darija→fusha (couche LLM) si nécessaire.
+                   reformulate: bool = True,
+                   history: list[dict] | None = None) -> tuple[list[RetrievedChunk], str]:
+    """Retrieval avec mémoire de conversation + reformulation darija→fusha (LLM).
 
-    Renvoie (chunks, requête_effective). En darija, on recherche avec la version
-    arabe standard ; sans LLM dispo (pas de clé), on retombe sur la requête brute.
+    Renvoie (chunks, question_autonome). Étapes :
+      1. Si `history`, on résout la question de suivi en question AUTONOME (8B).
+      2. En darija, on reformule cette question autonome en fusha pour le retrieval.
+    La question autonome (langue d'origine) sert ensuite à la génération.
+    Sans clé LLM, on retombe proprement sur la question brute.
     """
     langue = langue or detect_langue(question)
-    search_q = question
+    standalone = question
+    if history and config.GROQ_API_KEY:
+        standalone = llm.contextualize_question(history, question)
+    search_q = standalone
     if reformulate and detect_darija(question) and config.GROQ_API_KEY:
-        search_q = llm.reformulate_darija(question)
+        search_q = llm.reformulate_darija(standalone)
     chunks = retrieve(search_q, langue="ar" if detect_langue(search_q) == "ar" else langue,
                       code=code)
-    return chunks, search_q
+    return chunks, standalone
 
 
-def ask(question: str, langue: str | None = None, code: str | None = None) -> Answer:
-    """Question → réponse sourcée, ou refus honnête si rien d'applicable."""
+def ask(question: str, langue: str | None = None, code: str | None = None,
+        history: list[dict] | None = None) -> Answer:
+    """Question → réponse sourcée, ou refus honnête si rien d'applicable.
+
+    `history` (tours {role, content}) permet de résoudre les questions de suivi.
+    """
     langue = langue or detect_langue(question)
-    chunks, _ = retrieve_smart(question, langue=langue, code=code)
+    chunks, standalone = retrieve_smart(question, langue=langue, code=code, history=history)
 
     if not chunks:
         return Answer(answer=_REFUSAL.get(langue, _REFUSAL["ar"]),
                       sources=[], refused=True, langue=langue)
 
-    # La réponse reste dans la langue de la question d'origine (darija incluse).
-    messages = llm.build_messages(question, chunks)
+    # On génère sur la question AUTONOME (suivi résolu), dans la langue d'origine.
+    messages = llm.build_messages(standalone, chunks)
     text = llm.get_provider().generate(messages).strip()
 
     # Sentinel : le LLM juge le contexte hors-sujet → refus honnête.

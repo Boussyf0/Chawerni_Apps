@@ -168,7 +168,10 @@ class ApiException implements Exception {
 class ApiService {
   static const _timeout = Duration(seconds: 30);
 
-  Future<ApiAnswer> ask(String question, Lang lang) async {
+  /// [history] : tours précédents [{role: 'user'|'assistant', content}], du plus
+  /// ancien au plus récent, pour résoudre les questions de suivi côté backend.
+  Future<ApiAnswer> ask(String question, Lang lang,
+      {List<Map<String, String>> history = const []}) async {
     final uri = Uri.parse('${AppConfig.apiBase}/ask');
     try {
       final resp = await http
@@ -178,6 +181,7 @@ class ApiService {
             body: jsonEncode({
               'question': question,
               'langue': lang == Lang.fr ? 'fr' : 'ar',
+              if (history.isNotEmpty) 'history': history,
             }),
           )
           .timeout(_timeout);

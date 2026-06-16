@@ -69,6 +69,27 @@ fusha: ما هو عقد الكراء؟
 darija: منشكون كتمشي ليه الحضانة ديال الدراري؟
 fusha: لمن تُسند حضانة الأطفال؟"""
 
+CONTEXTUALIZE_PROMPT = """\
+Tu reçois l'HISTORIQUE d'une conversation juridique puis une NOUVELLE QUESTION, \
+souvent elliptique ou de suivi (ex. « et pour les femmes ? », « et dans ce cas ? », \
+« وللزوجة؟ »). Réécris cette nouvelle question en une question AUTONOME et complète, \
+compréhensible SANS l'historique, en y réinjectant le sujet sous-entendu.
+
+RÈGLES :
+- Garde EXACTEMENT la même langue que la nouvelle question (français → français, \
+arabe → arabe, darija → darija).
+- Si la nouvelle question est DÉJÀ autonome (sujet clair sans l'historique), \
+renvoie-la TELLE QUELLE, sans rien changer.
+- Réponds UNIQUEMENT par la question réécrite, une seule ligne, sans guillemets, \
+sans explication, sans préfixe.
+
+Exemple :
+HISTORIQUE :
+Utilisateur: Quels sont mes droits si je suis licencié ?
+Assistant: En cas de licenciement, l'article 52 prévoit une indemnité…
+NOUVELLE QUESTION : et pour la femme enceinte ?
+→ Quels sont les droits d'une femme enceinte en cas de licenciement ?"""
+
 
 class LLMProvider(ABC):
     """Interface minimale d'un fournisseur de génération."""
@@ -195,4 +216,29 @@ def reformulate_darija(question: str) -> str:
     ]
     # Tâche courte → modèle rapide (et empiriquement meilleur ici pour le retrieval).
     out = get_fast_provider().generate(messages, temperature=0.0, max_tokens=128)
+    return out.strip() or question
+
+
+def contextualize_question(history: list[dict], question: str) -> str:
+    """Résout une question de suivi en question autonome, via l'historique.
+
+    `history` = liste de {role: 'user'|'assistant', content: str}, du plus ancien
+    au plus récent. On n'utilise que les derniers tours (économie de tokens) et le
+    modèle RAPIDE (8B). Si pas d'historique → question inchangée. La question
+    autonome garde la langue d'origine (la reformulation darija→fusha, si besoin
+    pour le retrieval, est appliquée séparément en aval).
+    """
+    if not history:
+        return question
+    recent = history[-6:]
+    convo = "\n".join(
+        f"{'Utilisateur' if t.get('role') == 'user' else 'Assistant'}: {t.get('content', '').strip()}"
+        for t in recent
+    )
+    user = f"HISTORIQUE :\n{convo}\n\nNOUVELLE QUESTION : {question}"
+    messages = [
+        {"role": "system", "content": CONTEXTUALIZE_PROMPT},
+        {"role": "user", "content": user},
+    ]
+    out = get_fast_provider().generate(messages, temperature=0.0, max_tokens=160)
     return out.strip() or question

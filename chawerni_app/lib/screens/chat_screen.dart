@@ -85,12 +85,27 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // --- Live (API RAG) ------------------------------------------------------
 
+  /// Mémoire de conversation : on renvoie au backend les derniers tours aboutis
+  /// (question + réponse) pour qu'il résolve les questions de suivi.
+  List<Map<String, String>> _buildHistory() {
+    final hist = <Map<String, String>>[];
+    for (final ex in _exchanges) {
+      final ans = ex.apiAnswer;
+      if (ans == null || ans.refused) continue; // seulement les échanges aboutis
+      hist.add({'role': 'user', 'content': ex.userText});
+      hist.add({'role': 'assistant', 'content': ans.answer});
+    }
+    const maxMsgs = 6; // 3 derniers tours suffisent pour le contexte
+    return hist.length > maxMsgs ? hist.sublist(hist.length - maxMsgs) : hist;
+  }
+
   Future<void> _askApi(String question, Lang lang) async {
+    final history = _buildHistory(); // avant d'ajouter le nouvel échange
     final ex = _Exchange(userText: question);
     setState(() => _exchanges.add(ex));
     _scrollToEnd();
     try {
-      final ans = await _api.ask(question, lang);
+      final ans = await _api.ask(question, lang, history: history);
       if (!mounted) return;
       setState(() {
         ex.apiAnswer = ans;
@@ -364,7 +379,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _retry(_Exchange ex, Lang lang) async {
     try {
-      final ans = await _api.ask(ex.userText, lang);
+      final ans = await _api.ask(ex.userText, lang, history: _buildHistory());
       if (!mounted) return;
       setState(() {
         ex.apiAnswer = ans;

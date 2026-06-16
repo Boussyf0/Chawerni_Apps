@@ -5,10 +5,21 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 
+class Turn(BaseModel):
+    """Un tour de conversation (mémoire de chat). Pas de stockage serveur :
+    l'app renvoie l'historique récent à chaque requête (loi 09-08 : rien n'est loggé)."""
+
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str = Field(min_length=1, max_length=4000)
+
+
 class AskRequest(BaseModel):
     question: str = Field(min_length=2, max_length=2000)
     langue: str | None = Field(default=None, description="fr | ar (auto-détecté si absent)")
     code: str | None = Field(default=None, description="Restreindre à un code précis")
+    # Historique récent (du plus ancien au plus récent), pour résoudre les
+    # questions de suivi (« et pour les femmes ? »). On en exploite au plus 6.
+    history: list[Turn] = Field(default_factory=list, max_length=12)
 
 
 class SourceCard(BaseModel):

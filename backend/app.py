@@ -118,7 +118,8 @@ def ask(req: AskRequest) -> AskResponse:
     langue = req.langue or detect_langue(req.question)
     grave = safety.is_grave(req.question)
 
-    result = pipeline.ask(req.question, langue=langue, code=req.code)
+    history = [{"role": t.role, "content": t.content} for t in req.history]
+    result = pipeline.ask(req.question, langue=langue, code=req.code, history=history)
 
     # Post-gate : aucune citation inventée hors des sources fournies.
     source_nums = {
