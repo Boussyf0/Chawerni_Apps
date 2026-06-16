@@ -12,11 +12,14 @@ des compteurs et latences. Disclaimer systématique (loi 28-08).
 
 from __future__ import annotations
 
+import hashlib
 import logging
+import threading
 import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, PlainTextResponse
 
@@ -42,6 +45,58 @@ from .schemas import (
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("chawerni")
+
+
+class _RateLimiter:
+    """Limiteur par IP, en mémoire (process unique = un seul conteneur).
+
+    Deux fenêtres : par jour (budget IA) et par minute (anti-burst/scraping). La
+    clé est un HACHAGE de l'IP — on ne stocke ni ne loggue l'IP en clair (loi 09-08).
+    L'état est volatile (reset au redémarrage), ce qui est acceptable ici.
+    """
+
+    def __init__(self, per_day: int, per_min: int):
+        self.per_day = per_day
+        self.per_min = per_min
+        self._hits: dict[str, deque[float]] = defaultdict(deque)
+        self._lock = threading.Lock()
+
+    @staticmethod
+    def _key(ip: str) -> str:
+        return hashlib.sha256(ip.encode()).hexdigest()[:16]
+
+    def check(self, ip: str) -> tuple[bool, int]:
+        """Retourne (autorisé, retry_after_secondes)."""
+        now = time.time()
+        key = self._key(ip)
+        with self._lock:
+            dq = self._hits[key]
+            # purge > 24 h
+            day_ago = now - 86400
+            while dq and dq[0] < day_ago:
+                dq.popleft()
+            last_min = sum(1 for t in dq if t > now - 60)
+            if last_min >= self.per_min:
+                return False, 60
+            if len(dq) >= self.per_day:
+                return False, int(dq[0] + 86400 - now)
+            dq.append(now)
+            # garde la table bornée
+            if len(self._hits) > 50000:
+                for k in [k for k, v in self._hits.items() if not v]:
+                    self._hits.pop(k, None)
+            return True, 0
+
+
+_ask_limiter = _RateLimiter(config.ASK_MAX_PER_DAY, config.ASK_MAX_PER_MIN)
+
+
+def _client_ip(request: Request) -> str:
+    """IP réelle du client, en tenant compte du reverse-proxy Caddy (XFF)."""
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -196,8 +251,18 @@ def health() -> HealthResponse:
 
 
 @app.post("/ask", response_model=AskResponse)
-def ask(req: AskRequest) -> AskResponse:
+def ask(req: AskRequest, request: Request) -> AskResponse:
     t0 = time.time()
+    # Limite de débit par IP (protège le budget IA). 429 propre si dépassée.
+    allowed, retry = _ask_limiter.check(_client_ip(request))
+    if not allowed:
+        log.info("rate-limit /ask atteint (retry=%ds)", retry)
+        raise HTTPException(
+            status_code=429,
+            detail="Trop de questions pour aujourd'hui. Réessaie plus tard. "
+                   "كثرت الأسئلة اليوم، عاود المحاولة لاحقاً.",
+            headers={"Retry-After": str(max(retry, 1))},
+        )
     # La langue de la QUESTION fait foi (disclaimer/refus/bandeau dans CETTE langue),
     # pas celle de l'UI envoyée par l'app — sinon une question AR a un disclaimer FR.
     langue = detect_langue(req.question)

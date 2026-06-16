@@ -82,6 +82,13 @@ GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
 # et économise le quota quotidien du 70B (100k tokens/jour en free tier).
 GROQ_MODEL_FAST = os.environ.get("GROQ_MODEL_FAST", "llama-3.1-8b-instant")
 
+# --- Limite de débit /ask (protège le budget IA) ---------------------------
+# Plafonds PAR IP. Volontairement plus hauts que le quota freemium de l'app
+# (5/jour + bonus rewarded), pour qu'un utilisateur légitime ne soit jamais
+# bloqué — seuls les abus / appels directs à l'API sont coupés.
+ASK_MAX_PER_DAY = int(os.environ.get("ASK_MAX_PER_DAY", "60"))
+ASK_MAX_PER_MIN = int(os.environ.get("ASK_MAX_PER_MIN", "12"))
+
 # Noms présentables des codes (les citations doivent afficher le vrai nom, pas la
 # clé interne « doc »). Utilisé par build_context.
 CODE_NAMES = {
