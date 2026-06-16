@@ -33,6 +33,11 @@ class _Exchange {
   Scenario? scenario;
   ApiAnswer? apiAnswer;
   String? error;
+  // Traduction de la réponse (à la demande). `translatedText` remplace l'affichage
+  // tant qu'il est non nul ; `translating` montre un indicateur.
+  String? translatedText;
+  String? translatedTo;
+  bool translating = false;
   _Exchange({required this.userText, this.scenario}) : thinking = true;
 }
 
@@ -49,12 +54,14 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<_Exchange> _exchanges = [];
   final ScrollController _scroll = ScrollController();
   final TextEditingController _input = TextEditingController();
+  final FocusNode _inputFocus = FocusNode();
   final ApiService _api = ApiService();
 
   @override
   void dispose() {
     _scroll.dispose();
     _input.dispose();
+    _inputFocus.dispose();
     super.dispose();
   }
 
@@ -297,14 +304,20 @@ class _ChatScreenState extends State<ChatScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ChatBubble(text: ex.userText, isUser: true),
+        // Appui long sur sa propre question → menu Modifier (live API seulement).
+        GestureDetector(
+          onLongPress: AppConfig.hasApi && ex.scenario == null
+              ? () => _showEditSheet(ex, lang)
+              : null,
+          child: ChatBubble(text: ex.userText, isUser: true),
+        ),
         const SizedBox(height: 12),
         if (ex.thinking)
           ThinkingDots(labels: t.thinking)
         else if (ex.error != null)
           _errorBubble(ex, lang, t)
         else if (ex.apiAnswer != null)
-          ..._apiAnswerWidgets(ex.apiAnswer!, lang, t)
+          ..._apiAnswerWidgets(ex, lang, t)
         else if (ex.scenario != null)
           ..._scenarioWidgets(ex.scenario!, lang, t),
       ],
@@ -313,9 +326,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // --- Rendu réponse live --------------------------------------------------
 
-  List<Widget> _apiAnswerWidgets(ApiAnswer a, Lang lang, T t) {
+  List<Widget> _apiAnswerWidgets(_Exchange ex, Lang lang, T t) {
+    final a = ex.apiAnswer!;
     return [
-      ChatBubble(text: a.answer, isUser: false),
+      ChatBubble(text: ex.translatedText ?? a.answer, isUser: false),
+      if (!a.refused) ...[
+        const SizedBox(height: 6),
+        _translateRow(ex, lang),
+      ],
       for (final s in a.sources) ...[
         const SizedBox(height: 12),
         Padding(
@@ -352,6 +370,138 @@ class _ChatScreenState extends State<ChatScreen> {
             textDirection: TextDirection.rtl,
             style: Typo.style(size: Typo.xs, color: C.midad30)),
     ];
+  }
+
+  // --- #2 Traduction ------------------------------------------------------
+
+  static const _kTargets = {
+    'fr': 'Français',
+    'ar': 'العربية',
+    'darija': 'الدارجة',
+    'en': 'English',
+  };
+
+  Widget _translateRow(_Exchange ex, Lang lang) {
+    if (ex.translating) {
+      return Padding(
+        padding: const EdgeInsetsDirectional.only(start: 4),
+        child: Text(lang == Lang.fr ? 'Traduction…' : 'جاري الترجمة…',
+            style: Typo.style(size: Typo.xs, color: C.midad30)),
+      );
+    }
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Wrap(
+        spacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          if (ex.translatedText == null)
+            ChwChip(
+              label: lang == Lang.fr ? '🌐 Traduire' : '🌐 ترجم',
+              onTap: () => _pickTranslate(ex, lang),
+            )
+          else
+            ChwChip(
+              label: lang == Lang.fr ? '↩︎ Original' : '↩︎ الأصل',
+              onTap: () => setState(() {
+                ex.translatedText = null;
+                ex.translatedTo = null;
+              }),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _pickTranslate(_Exchange ex, Lang lang) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: C.surfaceCard,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(S.radiusSheet))),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Text(lang == Lang.fr ? 'Traduire la réponse en…' : 'ترجم الجواب إلى…',
+                style: Typo.style(size: Typo.base, weight: Typo.bold, color: C.midad)),
+            const SizedBox(height: 6),
+            for (final e in _kTargets.entries)
+              ListTile(
+                title: Text(e.value,
+                    style: Typo.style(size: Typo.base, color: C.midad)),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _translate(ex, e.key, lang);
+                },
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _translate(_Exchange ex, String target, Lang lang) async {
+    setState(() => ex.translating = true);
+    try {
+      final out = await _api.translate(ex.apiAnswer!.answer, target);
+      if (!mounted) return;
+      setState(() {
+        ex.translatedText = out;
+        ex.translatedTo = target;
+        ex.translating = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => ex.translating = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(lang == Lang.fr
+            ? 'Traduction indisponible, réessaie.'
+            : 'الترجمة غير متاحة، أعد المحاولة.'),
+      ));
+    }
+  }
+
+  // --- #3 Modifier un message ---------------------------------------------
+
+  /// Recharge le texte de la question dans le composer et supprime cet échange
+  /// et tous les suivants (on repart de ce point de la conversation).
+  void _showEditSheet(_Exchange ex, Lang lang) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: C.surfaceCard,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(S.radiusSheet))),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            ListTile(
+              leading: const Icon(Icons.edit_outlined, color: C.midad),
+              title: Text(lang == Lang.fr ? 'Modifier la question' : 'تعديل السؤال',
+                  style: Typo.style(size: Typo.base, color: C.midad)),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                _startEdit(ex);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _startEdit(_Exchange ex) {
+    final i = _exchanges.indexOf(ex);
+    if (i < 0) return;
+    setState(() => _exchanges.removeRange(i, _exchanges.length));
+    _input.text = ex.userText;
+    _input.selection = TextSelection.collapsed(offset: _input.text.length);
+    _inputFocus.requestFocus();
   }
 
   Widget _errorBubble(_Exchange ex, Lang lang, T t) {
@@ -476,6 +626,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: TextField(
                   controller: _input,
+                  focusNode: _inputFocus,
                   cursorColor: C.nila,
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => _submitTyped(lang),

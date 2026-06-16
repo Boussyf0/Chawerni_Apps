@@ -197,6 +197,28 @@ class ApiService {
     }
   }
 
+  /// Traduit [text] vers [target] (fr|ar|darija|en). Les citations [..] sont
+  /// préservées côté serveur.
+  Future<String> translate(String text, String target) async {
+    final uri = Uri.parse('${AppConfig.apiBase}/translate');
+    try {
+      final resp = await http
+          .post(
+            uri,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'text': text, 'target': target}),
+          )
+          .timeout(_timeout);
+      if (resp.statusCode != 200) throw ApiException('HTTP ${resp.statusCode}');
+      final j = jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
+      return j['text'] ?? text;
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException('$e');
+    }
+  }
+
   Future<List<ApiCode>> codes() async {
     final uri = Uri.parse('${AppConfig.apiBase}/codes');
     try {
