@@ -1,38 +1,29 @@
-# Build de l'image API et déploiement sur le droplet DigitalOcean via SSH.
-# Secrets requis (repo → Settings → Secrets) :
-#   DROPLET_HOST, DROPLET_USER, DROPLET_SSH_KEY
-# L'image est publiée sur GHCR (ghcr.io/<owner>/chawerni-api).
+# Auto-deploy de l'API sur le droplet DigitalOcean à chaque push sur main.
+# Le droplet rebuild lui-même (couches Docker en cache → quasi instantané), donc
+# pas besoin de builder l'image dans GitHub Actions. On se contente d'un SSH qui
+# tire le code (clé de déploiement read-only déjà configurée) et relance l'API.
+#
+# Secrets requis (repo → Settings → Secrets and variables → Actions) :
+#   DROPLET_HOST     = 164.90.216.143
+#   DROPLET_USER     = root
+#   DROPLET_SSH_KEY  = clé PRIVÉE gha_deploy (générée sur le droplet)
 name: deploy-api
 
 on:
   push:
     branches: [main]
+    # Ne se déclenche que si le backend change (pas pour un commit app-only).
     paths: ["backend/**", "rag/**", "Dockerfile", "docker-compose.yml", "Caddyfile"]
-  workflow_dispatch:
+  workflow_dispatch: {}   # bouton « Run workflow » manuel
+
+concurrency:
+  group: deploy-api       # un seul déploiement à la fois
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & push image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository_owner }}/chawerni-api:latest
-
       - name: Deploy on droplet over SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -40,7 +31,8 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
+            set -e
             cd /opt/chawerni
-            docker compose pull api || true
-            docker compose up -d --build
+            git pull --ff-only
+            docker compose up -d --build api
             docker image prune -f
