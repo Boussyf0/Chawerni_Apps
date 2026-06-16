@@ -83,11 +83,12 @@ GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
 GROQ_MODEL_FAST = os.environ.get("GROQ_MODEL_FAST", "llama-3.1-8b-instant")
 
 # --- Limite de débit /ask (protège le budget IA) ---------------------------
-# Plafonds PAR IP. Volontairement plus hauts que le quota freemium de l'app
-# (5/jour + bonus rewarded), pour qu'un utilisateur légitime ne soit jamais
-# bloqué — seuls les abus / appels directs à l'API sont coupés.
-ASK_MAX_PER_DAY = int(os.environ.get("ASK_MAX_PER_DAY", "60"))
-ASK_MAX_PER_MIN = int(os.environ.get("ASK_MAX_PER_MIN", "12"))
+# Plafonds PAR IP. ⚠ Au Maroc, les opérateurs mobiles font du CGNAT : beaucoup
+# d'utilisateurs partagent une même IP publique. Les seuils sont donc volontairement
+# HAUTS — ils servent de garde-fou anti-abus (script/scraping), PAS de quota par
+# utilisateur (ça, c'est le freemium de l'app : 5/jour). Ajustables par env.
+ASK_MAX_PER_DAY = int(os.environ.get("ASK_MAX_PER_DAY", "200"))
+ASK_MAX_PER_MIN = int(os.environ.get("ASK_MAX_PER_MIN", "20"))
 
 # Noms présentables des codes (les citations doivent afficher le vrai nom, pas la
 # clé interne « doc »). Utilisé par build_context.
