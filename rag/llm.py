@@ -168,13 +168,28 @@ def build_context(chunks) -> str:
     return "\n\n---\n\n".join(blocs)
 
 
-def build_messages(question: str, chunks) -> list[dict]:
-    """Construit la liste de messages (système + contexte + question)."""
+# Directive de langue explicite (rendue déterministe, indépendante du modèle).
+_LANG_DIRECTIVE = {
+    "fr": "Réponds en FRANÇAIS.",
+    "ar": "أجب باللغة العربية الفصحى حصراً (لا تستعمل الفرنسية في الشرح).",
+    "darija": "جاوب بالدارجة المغربية (بحروف عربية)، بأسلوب شفهي وبسيط، "
+              "والاقتباسات ديال الفصول تبقى بلغتها الأصلية.",
+}
+
+
+def build_messages(question: str, chunks, answer_lang: str = "fr") -> list[dict]:
+    """Construit la liste de messages (système + contexte + question + langue cible).
+
+    `answer_lang` ∈ {fr, ar, darija} force la langue de la RÉPONSE (déterminée en
+    amont d'après la question), pour éviter que le modèle dérive vers le français
+    quand le contexte récupéré est en français.
+    """
     context = build_context(chunks)
+    directive = _LANG_DIRECTIVE.get(answer_lang, _LANG_DIRECTIVE["fr"])
     user = (
         f"CONTEXTE (articles de loi disponibles) :\n\n{context}\n\n"
         f"---\n\nQUESTION : {question}\n\n"
-        "Réponds en t'appuyant uniquement sur le contexte ci-dessus, en citant "
+        f"{directive} Appuie-toi UNIQUEMENT sur le contexte ci-dessus, en citant "
         "chaque source au format [Code, Article N°, version]."
     )
     return [
@@ -217,6 +232,36 @@ def reformulate_darija(question: str) -> str:
     # Tâche courte → modèle rapide (et empiriquement meilleur ici pour le retrieval).
     out = get_fast_provider().generate(messages, temperature=0.0, max_tokens=128)
     return out.strip() or question
+
+
+_TRANSLATE_TARGET = {
+    "fr": "français",
+    "ar": "arabe standard moderne (fusha)",
+    "darija": "darija marocaine (arabe dialectal, en graphie arabe)",
+    "en": "anglais (English)",
+}
+
+
+def translate_text(text: str, target: str) -> str:
+    """Traduit une réponse vers `target` (fr|ar|darija|en) via le modèle rapide.
+
+    IMPÉRATIF : les citations entre crochets [Code, Article N°, JJ/MM/AAAA] sont
+    recopiées TELLES QUELLES (jamais traduites) — elles font foi juridiquement.
+    """
+    langue = _TRANSLATE_TARGET.get(target, _TRANSLATE_TARGET["fr"])
+    system = (
+        f"Tu es un traducteur juridique. Traduis fidèlement le texte en {langue}. "
+        "RÈGLES : conserve EXACTEMENT, sans les traduire ni les modifier, tous les "
+        "passages entre crochets [ ... ] (ce sont des citations d'articles de loi). "
+        "Garde le sens et le ton. Réponds UNIQUEMENT par la traduction, sans préfixe "
+        "ni commentaire."
+    )
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": text},
+    ]
+    out = get_fast_provider().generate(messages, temperature=0.1, max_tokens=1400)
+    return out.strip() or text
 
 
 def contextualize_question(history: list[dict], question: str) -> str:

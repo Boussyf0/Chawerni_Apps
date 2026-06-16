@@ -91,8 +91,13 @@ def ask(question: str, langue: str | None = None, code: str | None = None,
         return Answer(answer=_REFUSAL.get(langue, _REFUSAL["ar"]),
                       sources=[], refused=True, langue=langue)
 
+    # Langue de réponse = celle de la QUESTION d'origine (darija incluse), pas
+    # celle de l'UI : la darija reste en darija, l'arabe en arabe, le français en
+    # français — même si le contexte récupéré est dans une autre langue.
+    answer_lang = "darija" if detect_darija(question) else detect_langue(question)
+
     # On génère sur la question AUTONOME (suivi résolu), dans la langue d'origine.
-    messages = llm.build_messages(standalone, chunks)
+    messages = llm.build_messages(standalone, chunks, answer_lang=answer_lang)
     text = llm.get_provider().generate(messages).strip()
 
     # Sentinel : le LLM juge le contexte hors-sujet → refus honnête.

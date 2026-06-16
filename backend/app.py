@@ -20,7 +20,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 
-from rag import config, embedding, pipeline
+from rag import config, embedding, llm, pipeline
 from rag.retrieve import detect_langue, retrieve
 from rag.store import get_client
 from qdrant_client import models
@@ -36,6 +36,8 @@ from .schemas import (
     FeedbackRequest,
     HealthResponse,
     SourceCard,
+    TranslateRequest,
+    TranslateResponse,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -115,7 +117,9 @@ def health() -> HealthResponse:
 @app.post("/ask", response_model=AskResponse)
 def ask(req: AskRequest) -> AskResponse:
     t0 = time.time()
-    langue = req.langue or detect_langue(req.question)
+    # La langue de la QUESTION fait foi (disclaimer/refus/bandeau dans CETTE langue),
+    # pas celle de l'UI envoyée par l'app — sinon une question AR a un disclaimer FR.
+    langue = detect_langue(req.question)
     grave = safety.is_grave(req.question)
 
     history = [{"role": t.role, "content": t.content} for t in req.history]
@@ -159,6 +163,19 @@ def ask(req: AskRequest) -> AskResponse:
         disclaimer=safety.disclaimer_for(langue),
         langue=langue,
     )
+
+
+@app.post("/translate", response_model=TranslateResponse)
+def translate(req: TranslateRequest) -> TranslateResponse:
+    """Traduit un texte (typiquement une réponse) vers fr|ar|darija|en.
+
+    Les citations [Code, Article N°, date] sont préservées telles quelles. Aucun
+    contenu n'est journalisé (loi 09-08), seulement la langue cible et la latence.
+    """
+    t0 = time.time()
+    out = llm.translate_text(req.text, req.target)
+    log.info("translate target=%s latency=%dms", req.target, int((time.time() - t0) * 1000))
+    return TranslateResponse(text=out, target=req.target)
 
 
 def _fetch_article(code: str, article: str, langue: str):

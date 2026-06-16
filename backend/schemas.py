@@ -83,6 +83,16 @@ class FeedbackRequest(BaseModel):
     message_id: str | None = Field(default=None, max_length=64)
 
 
+class TranslateRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=6000)
+    target: str = Field(pattern="^(fr|ar|darija|en)$")
+
+
+class TranslateResponse(BaseModel):
+    text: str
+    target: str
+
+
 class HealthResponse(BaseModel):
     status: str
     model: str
