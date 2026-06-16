@@ -18,7 +18,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from rag import config, embedding, llm, pipeline
 from rag.retrieve import detect_langue, retrieve
@@ -91,6 +91,87 @@ def app_ads_txt() -> str:
     domaine « site développeur » déclaré sur le store. Sert ici via l'API au cas
     où ce domaine pointe vers le backend."""
     return "google.com, pub-8986402840311549, DIRECT, f08c47fec0942fa0\n"
+
+
+_PRIVACY_HTML = """<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chawerni — Politique de confidentialité / سياسة الخصوصية</title>
+<style>body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:760px;
+margin:24px auto;padding:0 16px;line-height:1.6;color:#1a1a2e}h1{font-size:1.5rem}
+h2{font-size:1.1rem;margin-top:1.6rem}.ar{direction:rtl;text-align:right}
+small{color:#666}hr{margin:2rem 0;border:none;border-top:1px solid #ddd}</style></head><body>
+
+<h1>Politique de confidentialité — Chawerni (شاورني)</h1>
+<small>Dernière mise à jour : 16 juin 2026 · Contact : boussyf0@gmail.com</small>
+
+<p>Chawerni est une application d'<strong>information juridique</strong> sur le droit
+marocain. Elle ne fournit pas de conseil juridique personnalisé et ne remplace pas un
+avocat.</p>
+
+<h2>Données que nous NE collectons PAS</h2>
+<p>L'application ne demande aucun compte. Nous ne collectons ni votre nom, ni votre
+e-mail, ni votre numéro de téléphone, ni votre localisation précise.</p>
+
+<h2>Vos questions</h2>
+<p>Le texte de vos questions est envoyé à nos serveurs et à notre fournisseur d'IA
+(Groq) uniquement pour générer la réponse. <strong>Nous ne stockons pas le contenu de
+vos questions</strong> lié à votre identité ; nous ne conservons que des compteurs
+anonymes (nombre de requêtes, latence) à des fins techniques.</p>
+
+<h2>Données stockées sur votre appareil</h2>
+<p>Vos préférences (langue, nombre de questions gratuites du jour) sont enregistrées
+localement sur votre téléphone, et jamais transmises.</p>
+
+<h2>Publicité</h2>
+<p>Nous utilisons <strong>Google AdMob</strong> pour afficher des publicités. AdMob
+peut collecter votre identifiant publicitaire et des informations sur votre appareil
+pour diffuser des annonces. Voir la politique de Google :
+<a href="https://policies.google.com/privacy">policies.google.com/privacy</a>. Vous
+pouvez réinitialiser ou limiter la personnalisation des annonces dans les réglages
+Android (Confidentialité → Annonces).</p>
+
+<h2>Partage</h2>
+<p>Nous ne vendons aucune donnée. Les seuls tiers impliqués sont nos prestataires
+techniques (hébergement, IA, régie publicitaire) cités ci-dessus.</p>
+
+<h2>Vos droits</h2>
+<p>Pour toute question ou demande, écrivez à <strong>boussyf0@gmail.com</strong>.</p>
+
+<hr>
+
+<div class="ar">
+<h1>سياسة الخصوصية — شاورني</h1>
+<small>آخر تحديث: 16 يونيو 2026 · للتواصل: boussyf0@gmail.com</small>
+<p>«شاورني» تطبيق <strong>للمعلومة القانونية</strong> حول القانون المغربي. لا يقدّم
+استشارة قانونية شخصية ولا يعوّض المحامي.</p>
+<h2>بيانات لا نجمعها</h2>
+<p>لا يتطلب التطبيق أي حساب. لا نجمع اسمك ولا بريدك الإلكتروني ولا رقم هاتفك ولا
+موقعك الدقيق.</p>
+<h2>أسئلتك</h2>
+<p>يُرسَل نص أسئلتك إلى خوادمنا وإلى مزوّد الذكاء الاصطناعي (Groq) فقط لإنشاء الجواب.
+<strong>لا نخزّن محتوى أسئلتك</strong> مرتبطاً بهويتك؛ نحتفظ فقط بعدّادات مجهولة
+(عدد الطلبات، زمن الاستجابة) لأغراض تقنية.</p>
+<h2>بيانات على جهازك</h2>
+<p>تُحفظ تفضيلاتك (اللغة، عدد الأسئلة المجانية اليومية) محلياً على هاتفك ولا تُرسَل
+أبداً.</p>
+<h2>الإعلانات</h2>
+<p>نستعمل <strong>Google AdMob</strong> لعرض الإعلانات. قد يجمع AdMob معرّفك الإعلاني
+ومعلومات عن جهازك لعرض الإعلانات. راجع سياسة Google. يمكنك إعادة ضبط أو تقييد تخصيص
+الإعلانات من إعدادات أندرويد.</p>
+<h2>المشاركة</h2>
+<p>لا نبيع أي بيانات. الأطراف الوحيدة المعنية هي مزوّدو الخدمات التقنية المذكورون
+أعلاه.</p>
+<h2>حقوقك</h2>
+<p>لأي سؤال أو طلب، راسلنا على <strong>boussyf0@gmail.com</strong>.</p>
+</div>
+
+</body></html>"""
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy() -> str:
+    """Politique de confidentialité (FR + AR) — URL requise par le Play Store."""
+    return _PRIVACY_HTML
 
 
 @app.get("/")
