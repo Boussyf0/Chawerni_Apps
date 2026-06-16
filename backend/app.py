@@ -113,10 +113,10 @@ avocat.</p>
 e-mail, ni votre numéro de téléphone, ni votre localisation précise.</p>
 
 <h2>Vos questions</h2>
-<p>Le texte de vos questions est envoyé à nos serveurs et à notre fournisseur d'IA
-(Groq) uniquement pour générer la réponse. <strong>Nous ne stockons pas le contenu de
-vos questions</strong> lié à votre identité ; nous ne conservons que des compteurs
-anonymes (nombre de requêtes, latence) à des fins techniques.</p>
+<p>Le texte de vos questions est envoyé à nos serveurs et à un prestataire d'IA tiers
+uniquement pour générer la réponse. <strong>Nous ne stockons pas le contenu de vos
+questions</strong> lié à votre identité ; nous ne conservons que des compteurs anonymes
+(nombre de requêtes, latence) à des fins techniques.</p>
 
 <h2>Données stockées sur votre appareil</h2>
 <p>Vos préférences (langue, nombre de questions gratuites du jour) sont enregistrées
@@ -148,7 +148,7 @@ techniques (hébergement, IA, régie publicitaire) cités ci-dessus.</p>
 <p>لا يتطلب التطبيق أي حساب. لا نجمع اسمك ولا بريدك الإلكتروني ولا رقم هاتفك ولا
 موقعك الدقيق.</p>
 <h2>أسئلتك</h2>
-<p>يُرسَل نص أسئلتك إلى خوادمنا وإلى مزوّد الذكاء الاصطناعي (Groq) فقط لإنشاء الجواب.
+<p>يُرسَل نص أسئلتك إلى خوادمنا وإلى مزوّد ذكاء اصطناعي خارجي فقط لإنشاء الجواب.
 <strong>لا نخزّن محتوى أسئلتك</strong> مرتبطاً بهويتك؛ نحتفظ فقط بعدّادات مجهولة
 (عدد الطلبات، زمن الاستجابة) لأغراض تقنية.</p>
 <h2>بيانات على جهازك</h2>
