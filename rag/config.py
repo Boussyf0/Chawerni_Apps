@@ -85,6 +85,10 @@ GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 # llama-3.1-8b-instant (16/08/2026). Modèle à raisonnement → les appels rapides
 # passent reasoning_effort=low (voir rag/llm.py) pour rester économes et non tronqués.
 GROQ_MODEL_FAST = os.environ.get("GROQ_MODEL_FAST", "openai/gpt-oss-20b")
+# Effort de raisonnement du modèle réponses (gpt-oss). « low » par défaut : coupe
+# fortement la latence (le défaut « medium » ajoutait 12–18 s en prod) sans perte
+# de qualité mesurable sur du Q&R juridique sourcé. Repli « medium »/« high » par env.
+GROQ_REASONING_EFFORT = os.environ.get("GROQ_REASONING_EFFORT", "low")
 
 # --- Limite de débit /ask (protège le budget IA) ---------------------------
 # Plafonds PAR IP. ⚠ Au Maroc, les opérateurs mobiles font du CGNAT : beaucoup

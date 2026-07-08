@@ -1,9 +1,11 @@
 """Garde-fous Chawerni (loi 28-08 : information juridique, jamais conseil).
 
 Deux passes encadrent le LLM :
-  - PRÉ : détection d'enjeu personnel grave (pénal lourd, garde d'enfants,
-    violence, divorce conflictuel) → on lève un drapeau pour afficher un bandeau
-    « un avocat est indispensable » SANS bloquer l'information.
+  - GRAVE : détection d'enjeu personnel grave (mort/violence, pénal, garde
+    d'enfants, nafaqa) → on lève un drapeau pour afficher un bandeau « un avocat
+    est indispensable » SANS bloquer l'information. Hybride : regex sur la question
+    + signal issu du retrieval (matière pénale en tête des sources) — ce dernier
+    rattrape les cas décrits sans le mot-clé exact (ex. « ...وهو مات » = homicide).
   - POST : vérification que chaque citation [Code, Article N°] présente dans la
     réponse existe bien dans les articles fournis au LLM. Une citation inventée
     est signalée (et la réponse dégradée vers « voir sources »).
@@ -16,16 +18,26 @@ from __future__ import annotations
 import re
 
 # Sujets à enjeu personnel grave → bandeau de redirection vers un professionnel.
+# NB : `divorce` et `licenciement` retirés (souvent questions purement informatives
+# → sur-déclenchaient le bandeau) ; l'enjeu réel garde d'enfants / nafaqa / violence
+# reste couvert par ses propres motifs. La matière pénale est rattrapée par le
+# signal des sources dans is_grave() (voir plus bas).
 _GRAVE_PATTERNS = [
     r"garde d['e]\s*enfant", r"حضانة", r"الحضانة",
-    r"divorce", r"طلاق", r"تطليق",
     r"violence", r"viol\b", r"agress", r"عنف", r"اعتداء", r"اغتصاب",
     r"prison", r"سجن", r"حبس", r"معتقل",
     r"\bmeurtre\b", r"\bhomicide\b", r"قتل",
+    # Mort / décès : un homicide peut être décrit sans le verbe « tuer / قتل ».
+    r"\btu[eé]", r"\bmort", r"décès",
+    r"\bمات", r"ماتت", r"يموت", r"الموت", r"وفاة", r"توفّ?[يى]",
     r"pension aliment", r"نفقة",
-    r"licenci", r"فصل تعسفي",  # licenciement : enjeu sérieux
 ]
 _GRAVE_RE = re.compile("|".join(_GRAVE_PATTERNS), re.IGNORECASE)
+
+# Matières où toute question personnelle justifie le bandeau avocat : si le meilleur
+# résultat du retrieval en relève, on lève le drapeau même sans mot-clé (sur-inclusion
+# = direction d'erreur sûre pour un sujet pénal / procédure pénale).
+_GRAVE_CODES = {"code_penal", "procedure_penale"}
 
 # Citations dans la réponse : [..., Article 446, ...] / [..., المادة 114, ...]
 _CITATION_RE = re.compile(r"\[[^\]]*?(?:article|art\.?|المادة|الفصل)\s*([0-9٠-٩]+)[^\]]*?\]",
@@ -44,9 +56,21 @@ LAWYER_BANNER = {
 }
 
 
-def is_grave(question: str) -> bool:
-    """Pré-gate : la question touche-t-elle un enjeu personnel grave ?"""
-    return bool(_GRAVE_RE.search(question))
+def is_grave(question: str, sources=None) -> bool:
+    """La question touche-t-elle un enjeu personnel grave ? (bandeau avocat)
+
+    Hybride : (1) mots-clés dans la question, (2) matière pénale en tête des
+    `sources` retrouvées (rattrape les cas paraphrasés sans mot-clé). `sources`
+    est une liste de RetrievedChunk (payload["code"]) ; optionnel (rétro-compat :
+    sur un refus, la liste est vide → seul le regex s'applique).
+    """
+    if _GRAVE_RE.search(question):
+        return True
+    if sources:
+        top_code = sources[0].payload.get("code")
+        if top_code in _GRAVE_CODES:
+            return True
+    return False
 
 
 def verify_citations(answer: str, source_article_nums: set[int]) -> tuple[bool, list[int]]:

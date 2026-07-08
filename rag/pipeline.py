@@ -98,7 +98,9 @@ def ask(question: str, langue: str | None = None, code: str | None = None,
 
     # On génère sur la question AUTONOME (suivi résolu), dans la langue d'origine.
     messages = llm.build_messages(standalone, chunks, answer_lang=answer_lang)
-    text = llm.get_provider().generate(messages).strip()
+    text = llm.get_provider().generate(
+        messages, reasoning_effort=config.GROQ_REASONING_EFFORT
+    ).strip()
 
     # Sentinel : le LLM juge le contexte hors-sujet → refus honnête.
     if llm.INSUFFICIENT in text:

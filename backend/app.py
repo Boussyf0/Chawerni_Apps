@@ -266,10 +266,13 @@ def ask(req: AskRequest, request: Request) -> AskResponse:
     # La langue de la QUESTION fait foi (disclaimer/refus/bandeau dans CETTE langue),
     # pas celle de l'UI envoyée par l'app — sinon une question AR a un disclaimer FR.
     langue = detect_langue(req.question)
-    grave = safety.is_grave(req.question)
 
     history = [{"role": t.role, "content": t.content} for t in req.history]
     result = pipeline.ask(req.question, langue=langue, code=req.code, history=history)
+
+    # Enjeu grave : mots-clés + matière pénale en tête des sources (d'où l'appel
+    # APRÈS pipeline.ask, quand result.sources est disponible).
+    grave = safety.is_grave(req.question, result.sources)
 
     # Post-gate : aucune citation inventée hors des sources fournies.
     source_nums = {
