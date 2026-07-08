@@ -14,8 +14,8 @@ services:
       QDRANT_URL: ${QDRANT_URL}
       QDRANT_API_KEY: ${QDRANT_API_KEY}
       GROQ_API_KEY: ${GROQ_API_KEY}
-      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}      # réponses (70B)
-      GROQ_MODEL_FAST: ${GROQ_MODEL_FAST:-llama-3.1-8b-instant} # reformulation darija
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}          # réponses (qualité)
+      GROQ_MODEL_FAST: ${GROQ_MODEL_FAST:-openai/gpt-oss-20b}   # reformulation darija
     # ⚠ PAS de volume sur /models : BGE-M3 est BAKÉ dans l'image (HF_HUB_OFFLINE=1).
     # Un volume vide masquerait le modèle → crash au boot en mode offline.
     expose:

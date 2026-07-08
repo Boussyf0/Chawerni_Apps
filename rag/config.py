@@ -6,7 +6,7 @@ le retrieval et le LLM. Aucune logique métier ici — juste les réglages.
 Variables d'environnement (toutes optionnelles sauf la clé Groq pour le LLM) :
   QDRANT_URL    — si défini, on parle à un serveur Qdrant ; sinon mode local disque
   GROQ_API_KEY  — clé API Groq (requise pour rag.llm / rag.pipeline)
-  GROQ_MODEL    — modèle Groq (défaut: llama-3.3-70b-versatile)
+  GROQ_MODEL    — modèle Groq (défaut: openai/gpt-oss-120b)
   BGE_MODEL     — modèle d'embedding (défaut: BAAI/bge-m3)
 
 Un fichier `rag/.env` (git-ignoré) est chargé automatiquement s'il existe.
@@ -74,13 +74,17 @@ DENSE_SCORE_MIN = 0.50
 
 # --- LLM (Groq) ------------------------------------------------------------
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-GROQ_BASE_URL = "https://api.groq.com/openai/v1"
-# Modèle de génération des réponses (qualité) — défaut 70B.
-GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
-# Modèle « rapide » pour les tâches courtes (reformulation darija→fusha). Mesuré :
-# le 8B reformule MIEUX pour le retrieval que le 70B (darija success@5 0,80 vs 0,60)
-# et économise le quota quotidien du 70B (100k tokens/jour en free tier).
-GROQ_MODEL_FAST = os.environ.get("GROQ_MODEL_FAST", "llama-3.1-8b-instant")
+# Endpoint Groq. Surchargé par env (ex. proxy Cloudflare AI Gateway) si l'IP du
+# serveur est géo-bloquée par Groq (403 « Access denied »).
+GROQ_BASE_URL = os.environ.get("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
+# Modèle de génération des réponses (qualité). Défaut gpt-oss-120b : remplaçant
+# recommandé par Groq après la décommission de llama-3.3-70b-versatile (16/08/2026).
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
+# Modèle « rapide » pour les tâches courtes (reformulation darija→fusha, suivi).
+# Défaut gpt-oss-20b : remplaçant recommandé par Groq après la décommission de
+# llama-3.1-8b-instant (16/08/2026). Modèle à raisonnement → les appels rapides
+# passent reasoning_effort=low (voir rag/llm.py) pour rester économes et non tronqués.
+GROQ_MODEL_FAST = os.environ.get("GROQ_MODEL_FAST", "openai/gpt-oss-20b")
 
 # --- Limite de débit /ask (protège le budget IA) ---------------------------
 # Plafonds PAR IP. ⚠ Au Maroc, les opérateurs mobiles font du CGNAT : beaucoup

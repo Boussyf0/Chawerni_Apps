@@ -31,7 +31,7 @@ Clé LLM (pour `rag.llm` / `rag.pipeline` / l'éval LLM) — env ou `rag/.env` :
 
 ```bash
 echo 'GROQ_API_KEY=gsk_…' > rag/.env        # git-ignoré
-# (optionnel) GROQ_MODEL=llama-3.3-70b-versatile
+# (optionnel) GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 ## Utilisation

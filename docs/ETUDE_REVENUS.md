@@ -22,7 +22,7 @@ tes vraies données AdMob une fois en production. (1 USD ≈ 10 MAD.)
 
 ## 2. Économie unitaire (LE calcul important)
 
-**Coût d'une question** (IA Groq, modèle 70B) :
+**Coût d'une question** (IA Groq, modèle qualité gpt-oss-120b) :
 - contexte (articles récupérés) + réponse ≈ 3 000 tokens
 - ≈ **0,002–0,003 $ par question** (≈ 0,02–0,03 MAD)
 - ⚠ le **palier gratuit Groq = 100 000 tokens/jour** ≈ **40–60 questions/jour offertes**. Au-delà → tier payant.
@@ -115,8 +115,8 @@ C'est la piste la plus rentable et la plus rapide — d'où la page « Trouver u
    - ✅ **Déjà en place** : quota freemium **côté app** (5 questions/jour).
    - 🔜 **À ajouter (recommandé)** :
      - **Limite côté serveur** sur `/ask` (par IP) — aujourd'hui l'API est ouverte et le quota n'est que dans l'app ; un appel direct peut faire exploser le coût IA.
-     - **Cache des questions fréquentes** (mêmes questions → même réponse, sans rappeler le 70B).
-     - **Routage 8B pour les cas simples** (aujourd'hui toutes les réponses passent par le 70B).
+     - **Cache des questions fréquentes** (mêmes questions → même réponse, sans rappeler le modèle qualité).
+     - **Routage vers le modèle rapide pour les cas simples** (aujourd'hui toutes les réponses passent par le modèle qualité).
 
 ---
 

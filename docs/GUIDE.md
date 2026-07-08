@@ -28,17 +28,17 @@ puisses tout comprendre et tout refaire seul. Garde ce fichier sous la main.
            │               │                  │
            ▼               ▼                  ▼
    🔎 Qdrant Cloud     🧠 Groq (LLM)    (app-ads.txt, /privacy)
-   (index, 11096        70B + 8B
+   (index, 11096        120B + 20B
     fragments)
 ```
 
 **Ce qui se passe quand tu poses une question :**
 1. L'app envoie ta question (+ l'historique récent) à l'API.
-2. Si c'est de la darija ou une question de suivi → le **modèle 8B** la reformule en
+2. Si c'est de la darija ou une question de suivi → le **modèle rapide** la reformule en
    question autonome en arabe standard.
 3. L'API transforme la question en vecteur (**BGE-M3**) et cherche les articles les
    plus proches dans **Qdrant**.
-4. Les articles trouvés + ta question partent au **modèle 70B (Groq)** qui rédige la
+4. Les articles trouvés + ta question partent au **modèle qualité (Groq)** qui rédige la
    réponse, dans **ta langue**, en citant les articles.
 5. Des garde-fous vérifient qu'aucune citation n'est inventée, ajoutent le disclaimer.
 6. L'app affiche la réponse + les cartes sources cliquables.
@@ -53,7 +53,7 @@ puisses tout comprendre et tout refaire seul. Garde ce fichier sous la main.
 | API (backend) | Droplet `/opt/chawerni`, Docker | sert `/ask`, `/codes`, `/translate`… |
 | Modèle BGE-M3 | **baké** dans l'image Docker | transforme texte → vecteur |
 | Index vectoriel | **Qdrant Cloud** (`871b2393-…`) | 11 096 fragments d'articles |
-| LLM | **Groq** (70B réponses, 8B reformulation/traduction) | rédige les réponses |
+| LLM | **Groq** (gpt-oss-120b réponses, 8B reformulation/traduction) | rédige les réponses |
 | HTTPS | **Caddy** sur le droplet + `nip.io` | certificat Let's Encrypt auto |
 | App | Flutter, package `ma.chawerni.chawerni` | l'app Android |
 | Auto-deploy | GitHub Actions (`.github/workflows/deploy-api.yml`) | redéploie à chaque push |
@@ -100,7 +100,7 @@ Depuis n'importe où :
 ```
 curl https://164.90.216.143.nip.io/health
 ```
-Réponse attendue : `{"status":"ok","model":"llama-3.3-70b-versatile","points":11096}`
+Réponse attendue : `{"status":"ok","model":"openai/gpt-oss-120b","points":11096}`
 
 ### 4.3 Mettre à jour le backend (manuel)
 Sur le droplet :
@@ -208,8 +208,8 @@ Envoie-leur simplement le fichier `app-release.apk` (WhatsApp, Drive…). Ils ac
 | Feature | Où dans le code | Comment ça marche |
 |---|---|---|
 | Recherche d'articles | `rag/retrieve.py` | court-circuit sur n° d'article + recherche hybride (sens + mots) |
-| Réponse IA sourcée | `rag/pipeline.py`, `rag/llm.py` | 70B, citations obligatoires, refus si rien trouvé |
-| Darija → arabe standard | `rag/llm.py` `reformulate_darija` | la darija ne se cherche pas brute → reformulée (8B) |
+| Réponse IA sourcée | `rag/pipeline.py`, `rag/llm.py` | modèle qualité, citations obligatoires, refus si rien trouvé |
+| Darija → arabe standard | `rag/llm.py` `reformulate_darija` | la darija ne se cherche pas brute → reformulée (modèle rapide) |
 | Mémoire de conversation | `rag/llm.py` `contextualize_question` | résout « et pour les femmes ? » en question autonome |
 | Langue de réponse | `backend/app.py` + `rag/pipeline.py` | = langue de la **question** (pas de l'UI) |
 | Traduction | `/translate`, `rag/llm.py` `translate_text` | fr/ar/darija/en, citations préservées |

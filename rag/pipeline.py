@@ -61,7 +61,7 @@ def retrieve_smart(question: str, langue: str | None = None, code: str | None = 
     """Retrieval avec mémoire de conversation + reformulation darija→fusha (LLM).
 
     Renvoie (chunks, question_autonome). Étapes :
-      1. Si `history`, on résout la question de suivi en question AUTONOME (8B).
+      1. Si `history`, on résout la question de suivi en question AUTONOME (modèle rapide).
       2. En darija, on reformule cette question autonome en fusha pour le retrieval.
     La question autonome (langue d'origine) sert ensuite à la génération.
     Sans clé LLM, on retombe proprement sur la question brute.

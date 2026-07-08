@@ -83,10 +83,11 @@ Secrets repo : `DROPLET_HOST`, `DROPLET_USER`, `DROPLET_SSH_KEY`. Variable : `AP
 
 ## 6. Réglages & qualité
 
-- **Modèle LLM** (bi-modèle) : `GROQ_MODEL=llama-3.3-70b-versatile` (réponses, bien
-  meilleur) + `GROQ_MODEL_FAST=llama-3.1-8b-instant` (reformulation darija). ⚠ Le 70B
-  free = **100k tokens/JOUR** ; si tu épuises le quota (429 TPD), rabats temporairement
-  `GROQ_MODEL` sur le 8B ou passe au Dev tier payant.
+- **Modèle LLM** (bi-modèle) : `GROQ_MODEL=openai/gpt-oss-120b` (réponses, qualité ;
+  remplace llama-3.3-70b, décommissionné le 16/08/2026) + `GROQ_MODEL_FAST=openai/gpt-oss-20b`
+  (reformulation darija ; remplace llama-3.1-8b, décommissionné le 16/08/2026). ⚠ Le free
+  tier est plafonné en tokens/JOUR ; si tu épuises le quota (429 TPD), rabats temporairement
+  `GROQ_MODEL` sur le modèle rapide ou passe au Dev tier payant.
 - **Seuil de refus** : `rag/config.py` → `DENSE_SCORE_MIN`.
 - **Santé** : `GET /health` ; **logs** : `docker compose logs -f api` (jamais le
   contenu des questions — loi 09-08).

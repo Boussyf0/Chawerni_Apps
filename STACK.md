@@ -58,8 +58,8 @@ PDFs officiels (Adala)                         App mobile Flutter
                           BGE-M3 (dense+sparse)       ├─► retrieve hybride (RRF + n° exact)
                                  ▼                    │      └─ Qdrant (collection chawerni_articles)
                           Qdrant (index)  ◄───────────┤
-                                                      ├─► reformulation darija→fusha (LLM 8B)
-                                                      ├─► génération réponse (LLM 70B Groq)
+                                                      ├─► reformulation darija→fusha (LLM rapide)
+                                                      ├─► génération réponse (LLM qualité Groq)
                                                       └─► safety gates (pré/post) + disclaimer
 ```
 
@@ -270,19 +270,22 @@ via le SDK **OpenAI-compatible** (`base_url = https://api.groq.com/openai/v1`).
 toucher au retriever ni au backend.
 
 **Architecture bi-modèle** (mesurée et décidée) :
-- **Réponses → `llama-3.3-70b-versatile`** (qualité : sur « loyer », trouve le bon
+- **Réponses → `openai/gpt-oss-120b`** (qualité ; remplace `llama-3.3-70b-versatile`,
+  décommissionné le 16/08/2026 — sur « loyer », le modèle qualité trouve le bon
   article 667, citations propres, complet — le 8B tronquait et cassait les citations).
-- **Reformulation darija → `llama-3.1-8b-instant`** (`GROQ_MODEL_FAST`) : tâche
-  courte où le 8B est **meilleur pour le retrieval** (0,80 vs 0,60 avec le 70B) **et**
-  économe.
+- **Reformulation darija → `openai/gpt-oss-20b`** (`GROQ_MODEL_FAST`, remplace
+  `llama-3.1-8b-instant` décommissionné le 16/08/2026) : tâche courte où le petit
+  modèle mesurait **meilleur pour le retrieval** que le modèle qualité (0,80 vs 0,60
+  sur l'ancien 8B) **et** reste économe. ⚠ Modèle à raisonnement → appels en
+  `reasoning_effort=low` (cf. `llm.py`) ; à re-mesurer sur gpt-oss-20b.
 
 **Prompt système** : rôle (information, pas conseil — C2) ; **citation obligatoire**
 au format `[Nom du code, Article N°, JJ/MM/AAAA]` reprise telle quelle du contexte ;
 **refus** (`INSUFFISANT`) si le contexte ne répond pas ; réponse dans la **langue de
 la question**. `build_context` injecte les vrais noms de code + dates formatées.
 
-**Pièges** : `llama-3.3-70b` est plafonné à **100 000 tokens/jour** en free tier
-(une éval complète l'épuise) → backoff sur 429, et Dev tier (payant) pour la charge.
+**Pièges** : le free tier Groq est plafonné en **tokens/jour** (une éval complète
+l'épuise) → backoff sur 429, et Dev tier (payant) pour la charge.
 
 ### 5.6 Évaluation chiffrée — la **gate** (`rag/eval/`)
 50 questions de référence (FR + AR) typées : `exact` (numéro), `semantic`, `darija`,
@@ -432,7 +435,7 @@ puis `python -m rag.index`). Voir `DEPLOY.md` pour le pas-à-pas.
 | OCR arabe | **Tesseract `ara`** | lire les glyphes (couche texte cassée) | LLM-clean (altère le texte de loi) |
 | Embeddings | **BGE-M3** | dense + sparse multilingue | OpenAI embeddings (API, pas de sparse) ; e5 (dense seul) |
 | Base vectorielle | **Qdrant** | index + RRF + filtres | pgvector (pas de sparse/RRF) ; Pinecone (SaaS) |
-| LLM | **Groq** (Llama 3.3 70B / 3.1 8B) | génération + reformulation | OpenAI/Anthropic (coût/latence) — abstraction = swappable |
+| LLM | **Groq** (GPT-OSS 120B / Llama 3.1 8B) | génération + reformulation | OpenAI/Anthropic (coût/latence) — abstraction = swappable |
 | API | **FastAPI** + Uvicorn | endpoints HTTP | Flask (pas d'async/validation native) |
 | Validation | **Pydantic** | schémas req/resp | — |
 | App | **Flutter / Dart** | iOS + Android, RTL | React Native (RTL/perf), natif ×2 (coût) |
@@ -486,7 +489,7 @@ journalier). App-open câblé via un `WidgetsBindingObserver` dans `main.dart`.
 
 ### À venir
 - **Abonnement Pro** (`in_app_purchase` : StoreKit / Play Billing) — sans pub, modèle
-  70B, fiches Hoquqi premium, hors-ligne. `QuotaService.isPro` est déjà le drapeau prévu.
+  qualité, fiches Hoquqi premium, hors-ligne. `QuotaService.isPro` est déjà le drapeau prévu.
 - **Native ads** (dans la liste Bibliothèque) — possible, plus complexe (templates natifs).
 
 ---
@@ -497,7 +500,7 @@ journalier). App-open câblé via un `WidgetsBindingObserver` dans `main.dart`.
 - **Qualité arabe** : l'OCR corrige ~87 % des articles ; ~13 % gardent le texte
   d'origine (bruité mais complet) + artefacts de ponctuation OCR (`»` pour `،`).
   Amélioration possible : OCR plus haute résolution / post-correction ciblée.
-- **70B free tier** : 100k tokens/jour → suffisant pour des requêtes utilisateur
+- **Free tier Groq** : quota tokens/jour → suffisant pour des requêtes utilisateur
   ponctuelles, insuffisant pour des évals/charge lourdes (passer au Dev tier).
 - **Refus hors-corpus** : ~0,5 au niveau pipeline (le 8B émet peu le sentinel
   `INSUFFISANT`) ; s'améliore avec un meilleur modèle.

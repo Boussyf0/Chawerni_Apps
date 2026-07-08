@@ -96,7 +96,7 @@ class LLMProvider(ABC):
 
     @abstractmethod
     def generate(self, messages: list[dict], temperature: float = 0.2,
-                 max_tokens: int = 1024) -> str:
+                 max_tokens: int = 1024, reasoning_effort: str | None = None) -> str:
         ...
 
 
@@ -115,10 +115,15 @@ class GroqProvider(LLMProvider):
         self._client = OpenAI(base_url=config.GROQ_BASE_URL, api_key=key)
 
     def generate(self, messages: list[dict], temperature: float = 0.2,
-                 max_tokens: int = 1024) -> str:
+                 max_tokens: int = 1024, reasoning_effort: str | None = None) -> str:
         import time
 
         from openai import APIError, RateLimitError
+
+        # Modèles à raisonnement (gpt-oss) : `reasoning_effort` passe par extra_body
+        # (paramètre hors schéma OpenAI). « low » minimise les tokens de raisonnement
+        # pour qu'ils n'épuisent pas le budget max_tokens des tâches courtes.
+        extra = {"reasoning_effort": reasoning_effort} if reasoning_effort else None
 
         # Backoff sur les limites de débit Groq (l'éval enchaîne ~40 appels).
         delay = 2.0
@@ -129,6 +134,7 @@ class GroqProvider(LLMProvider):
                     messages=messages,
                     temperature=temperature,
                     max_tokens=max_tokens,
+                    extra_body=extra,
                 )
                 return resp.choices[0].message.content or ""
             except RateLimitError:
@@ -203,7 +209,7 @@ _fast_provider: LLMProvider | None = None
 
 
 def get_provider() -> LLMProvider:
-    """Fournisseur LLM de génération (modèle qualité, ex. 70B)."""
+    """Fournisseur LLM de génération (modèle qualité, ex. gpt-oss-120b)."""
     global _provider
     if _provider is None:
         _provider = GroqProvider()
@@ -211,7 +217,7 @@ def get_provider() -> LLMProvider:
 
 
 def get_fast_provider() -> LLMProvider:
-    """Fournisseur LLM rapide/économique (ex. 8B) pour les tâches courtes."""
+    """Fournisseur LLM rapide/économique (ex. gpt-oss-20b) pour les tâches courtes."""
     global _fast_provider
     if _fast_provider is None:
         _fast_provider = GroqProvider(model=config.GROQ_MODEL_FAST)
@@ -229,8 +235,11 @@ def reformulate_darija(question: str) -> str:
         {"role": "system", "content": REFORMULATE_PROMPT},
         {"role": "user", "content": question},
     ]
-    # Tâche courte → modèle rapide (et empiriquement meilleur ici pour le retrieval).
-    out = get_fast_provider().generate(messages, temperature=0.0, max_tokens=128)
+    # Tâche courte → modèle rapide. reasoning_effort=low + marge de tokens : le modèle
+    # gpt-oss raisonne peu et ne tronque pas la sortie (sinon fallback = question brute).
+    out = get_fast_provider().generate(
+        messages, temperature=0.0, max_tokens=512, reasoning_effort="low"
+    )
     return out.strip() or question
 
 
@@ -260,7 +269,9 @@ def translate_text(text: str, target: str) -> str:
         {"role": "system", "content": system},
         {"role": "user", "content": text},
     ]
-    out = get_fast_provider().generate(messages, temperature=0.1, max_tokens=1400)
+    out = get_fast_provider().generate(
+        messages, temperature=0.1, max_tokens=2000, reasoning_effort="low"
+    )
     return out.strip() or text
 
 
@@ -269,7 +280,7 @@ def contextualize_question(history: list[dict], question: str) -> str:
 
     `history` = liste de {role: 'user'|'assistant', content: str}, du plus ancien
     au plus récent. On n'utilise que les derniers tours (économie de tokens) et le
-    modèle RAPIDE (8B). Si pas d'historique → question inchangée. La question
+    modèle RAPIDE (gpt-oss-20b). Si pas d'historique → question inchangée. La question
     autonome garde la langue d'origine (la reformulation darija→fusha, si besoin
     pour le retrieval, est appliquée séparément en aval).
     """
@@ -285,5 +296,7 @@ def contextualize_question(history: list[dict], question: str) -> str:
         {"role": "system", "content": CONTEXTUALIZE_PROMPT},
         {"role": "user", "content": user},
     ]
-    out = get_fast_provider().generate(messages, temperature=0.0, max_tokens=160)
+    out = get_fast_provider().generate(
+        messages, temperature=0.0, max_tokens=512, reasoning_effort="low"
+    )
     return out.strip() or question
